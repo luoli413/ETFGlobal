@@ -129,7 +129,7 @@ class context(object):
         self.feature_name = headers.columns.values[2:]
         self.start_day = start_day
         self.end_day = end_day
-        self.trading_data_list = ['close']
+        self.trading_data_list = ['close','volume']
         self.leverage = leverage
         self.trading_days = trading_days
         self.variable_list = f_list
@@ -140,7 +140,10 @@ class context(object):
             temp_col = temp.columns.values
             temp_col[0] = 'Date'
             temp.columns = temp_col
-            temp['Date'] = pd.to_datetime(temp['Date'],format ='%m/%d/%Y')
+            try:
+                temp['Date'] = pd.to_datetime(temp['Date'],format ='%m/%d/%Y')
+            except:
+                temp['Date'] = pd.to_datetime(temp['Date'], format='%Y-%m-%d')
             temp.sort_values(['Date'], inplace=True)
             temp.set_index(['Date'], drop=True, inplace=True)
             self.context_dict[i] = temp
@@ -379,7 +382,7 @@ class context(object):
                             if flag:
                                 weight_new = weight_new_temp
                                 print(str(df.index[s - 1])[:10],\
-                                      len(weight_new[weight_new>0]),'stocks in portfolio')
+                                      len(weight_new[weight_new != 0]),'stocks in portfolio')
                                 # print(weight_new[weight_new != 0].head())
                                 weights.loc[df.index[s - 1],:] = 0.0
                                 weights.loc[df.index[s - 1], weight_new.index] = weight_new.values

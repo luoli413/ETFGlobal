@@ -75,10 +75,13 @@ def fix_stock_order(order_case):
     def wrapper(test_y,*args):
         weight_new = pd.Series(np.zeros(test_y.shape[0]), index=test_y.index)
         flag = True
-        pool = order_case(test_y,*args)
-        if len(pool)>0:
-            weight_new.loc[pool] = 1.0 / len(pool)
-        else:
+        pool_long,pool_short = order_case(test_y,*args)
+        if len(pool_long)>0:
+
+            weight_new.loc[pool_long] =  0.5 / len(pool_long)
+        if len(pool_short)>0:
+            weight_new.loc[pool_short] = -0.5/len(pool_short)
+        if len(pool_long)<=0 & len(pool_short)<=0:
             # equally-weighted portfolio with all stocks in test_y
            weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
 
@@ -92,7 +95,7 @@ def fix_stock_order(order_case):
 def selecting(select_step):
 
     def wrapper(context_dict,f_calendar,*args, **kwargs):
-        keys = ['close']
+        keys = ['close','volume']
         s = 0
         # trade_status
         for i in keys:
@@ -101,12 +104,10 @@ def selecting(select_step):
             if s == 0:
                 symbols = fd.columns[~fd.loc[indexing, :].isnull()].values
             else:
-                pass
-                # if i == 'ipo_listdays':
-                #     temp = fd.columns[fd.loc[indexing, :] >= 90]
-                # else:
-                #     temp = fd.columns[fd.loc[indexing, :] == 1].values
-                # symbols = list(set(symbols).intersection(set(temp)))
+                flag_nan = ~fd.loc[indexing,:].isnull()
+                flag_zero = fd.loc[indexing,:]>0
+                temp = fd.columns[flag_zero & flag_nan].values
+                symbols = list(set(symbols).intersection(set(temp)))
             s += 1
         return select_step(symbols,context_dict,f_calendar,*args, **kwargs)
 

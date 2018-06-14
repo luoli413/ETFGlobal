@@ -58,9 +58,10 @@ def record_weights(df, i, weights):
 
 def record_return(df, i, reb_index, weight_new, leverage, trading_days=252.0,
                   interest_rate=2.5):
-    cum_return = np.dot((df.iloc[i, :][weight_new.index.values] - \
-                    df.iloc[reb_index, :][weight_new.index.values])/df.iloc[reb_index, :][weight_new.index.values],\
-                        weight_new.values)
+    return_vector = (df.iloc[i, :][weight_new.index.values] - \
+                    df.iloc[reb_index, :][weight_new.index.values])/df.iloc[reb_index, :][weight_new.index.values]
+    return_vector[return_vector.isnull()] = 0.0 # no trade,then no return
+    cum_return = np.dot(return_vector,weight_new.values)
     df['nav'].iloc[i] = df['nav'].iloc[reb_index] * (1 + cum_return * leverage + (1 - leverage) * (i - reb_index) \
                                                      * interest_rate / trading_days/100)
     return df
