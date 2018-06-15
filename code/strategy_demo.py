@@ -63,14 +63,15 @@ if __name__ == "__main__":
     # ftp.data_processing()
 
     # parameters initialization
-    variable_list = ['quant_technical_st','quant_technical_it', 'quant_technical_lt']
-    leverage = 1.0
+    variable_list = ['quant_technical_st','quant_technical_it', 'quant_technical_lt',\
+                     'quant_fundamental_pe', 'quant_fundamental_pcf', 'quant_fundamental_pb',]
+    leverage = 0.95
     # end_day = -1 # -1 means till today
-    start_day = '2014-01-01'
+    start_day = '2012-01-01'
     trading_days = 252.0
     horizon = 21*2
-    freq = 21 #rebalance monthly
-    roll = 6 # rolling in 6 months
+    freq = 21*2 #rebalance monthly
+    roll = 12 # rolling in 12 months
     ben = 'ben'
     model_name = 'SVR'
     relative = True
@@ -80,9 +81,9 @@ if __name__ == "__main__":
     # # back-test initialization
     context = context(start_day,leverage,trading_days,variable_list,)
     # form training set and you just need run once and after that you can comment it until you change variable list.
-    # context.generate_train(variable_list,horizon, relative, ben, normalize=True)
+    context.generate_train(variable_list,horizon, relative, ben, normalize=True)
     # name the results using parameters and so on
-    address = 'test_etf'+ '_' + model_name + '.csv'
+    address = 'etf'+ '_short50%_' + model_name + '.csv'
     context.back_test(ben, horizon, freq, model_name, address, select_stocks, order_method,\
                       bottom_thre=bottom_thre,top_thre = top_thre,roll=roll)
 

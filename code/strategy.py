@@ -66,19 +66,13 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
     return test_y,summary
 
 def fix_stock_order(order_case):
-    '''
-    test_y: series with tic index
-    threshold: top 5% percent
-    return: ratio in risky asset
-    '''
 
     def wrapper(test_y,*args):
         weight_new = pd.Series(np.zeros(test_y.shape[0]), index=test_y.index)
         flag = True
         pool_long,pool_short = order_case(test_y,*args)
         if len(pool_long)>0:
-
-            weight_new.loc[pool_long] =  0.5 / len(pool_long)
+            weight_new.loc[pool_long] = 0.5 / len(pool_long)
         if len(pool_short)>0:
             weight_new.loc[pool_short] = -0.5/len(pool_short)
         if len(pool_long)<=0 & len(pool_short)<=0:
