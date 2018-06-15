@@ -10,7 +10,7 @@ data_path = os.path.join(path + '\\data\\')
 ana_path = os.path.join(path+'\\analytics\\')
 res_path = os.path.join(path+ '\\res\\')
 
-def compute_indicators(df,ben,save_address,trading_days, required=0.08, whole=1):
+def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1):
     # columns needed
     col = ['ben', 'nav', 'rebalancing', 'stoploss', 'Interest_rate']
     # df = self.book
@@ -22,7 +22,7 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.08, whole=1)
     # daily return
     df_valid['return'] = (df['nav'] - df['nav'].shift(1))/ df['nav'].shift(1)
     # benchmark_net_value
-    df_valid['ben'] = df_valid[ben] / df_valid[ben].iloc[0]
+    df_valid[ben] = df_valid[ben] / df_valid[ben].iloc[0]
     # df_valid['hs300'] = df_valid['hs300'] / df_valid['hs300'].iloc[0]
 
     # benchmark_return
@@ -30,23 +30,27 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.08, whole=1)
                                     df_valid[ben].shift(1)) / \
                                    df_valid[ben].shift(1)
     # Annualized return
-
     df_valid['Annu_return'] = df_valid['return'].expanding(min_periods=1).mean() * trading_days
     # Volatility
     df_valid.loc[:, 'algo_volatility'] = df_valid['return'].\
                                              expanding(min_periods=1).std() * np.sqrt(trading_days)
-    df_valid.loc[:, 'xret'] = df_valid['return'] - \
+    temp = df_valid['return'] - \
                               df_valid['Interest_rate'] / trading_days / 100
-    df_valid.loc[:, 'ex_return'] = df_valid['return'] - df_valid[ben+'_return']
+    temp_rela = df_valid['return'] - df_valid[ben+'_return']
 
     def ratio(x):
         return np.nanmean(x) / np.nanstd(x)
 
     # sharpe ratio
-    df_valid.loc[:, 'sharpe'] = df_valid['xret'].expanding(min_periods=1).apply(ratio) \
+    df_valid.loc[:, 'sharpe'] = temp.expanding(min_periods=1).apply(ratio) \
+                                * np.sqrt(trading_days)
+    # sharpe of benchmark
+    temp = df_valid[ben+'_return'] - \
+                              df_valid['Interest_rate'] / trading_days / 100
+    df_valid.loc[:,ben+'_sharpe'] = temp.expanding(min_periods=1).apply(ratio) \
                                 * np.sqrt(trading_days)
     # information ratio
-    df_valid.loc[:, 'IR'] = df_valid['ex_return'].expanding().apply(ratio) \
+    df_valid.loc[:, 'IR'] = temp_rela.expanding().apply(ratio) \
                             * np.sqrt(trading_days)
 
     # Sortino ratio
@@ -58,6 +62,10 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.08, whole=1)
 
     df_valid.loc[:, 'sortino'] = df_valid['return'].expanding().\
                                      apply(modify_ratio, args=(required,)) * np.sqrt(trading_days)
+    # loss probability
+    wins = np.where(df_valid['return'] < 0, 1.0, 0.0)
+    df_valid.loc[:, 'loss_rate'] = wins.cumsum() / \
+                                  pd.Series(wins, index=df_valid.index).expanding(min_periods=2).apply(len)
     # Transfer infs to NA
     df_valid.loc[np.isinf(df_valid.loc[:, 'sharpe']), 'sharpe'] = np.nan
     df_valid.loc[np.isinf(df_valid.loc[:, 'IR']), 'IR'] = np.nan
@@ -72,6 +80,7 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.08, whole=1)
     # 95% CVaR
     df_valid['CVaR'] = -df_valid['return'].expanding().apply(lambda x: \
                 np.nanmean(x[x < np.nanpercentile(x,5)])) * np.sqrt(trading_days)
+
 
     if whole == 1:
         # max_drawdown
@@ -123,7 +132,8 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.08, whole=1)
     df_valid.to_csv(save_address)
 
 class context(object):
-    def __init__(self,start_day,leverage,trading_days,f_list,end_day=-1,method='monthly'):
+    def __init__(self,start_day,leverage,long_position,short_position,\
+                 trading_days,f_list,end_day=-1,method='monthly'):
 
         headers = pd.read_csv(ana_path+'headers_analytics.csv')
         self.feature_name = headers.columns.values[2:]
@@ -131,6 +141,8 @@ class context(object):
         self.end_day = end_day
         self.trading_data_list = ['close','volume']
         self.leverage = leverage
+        self.long_position = long_position
+        self.short_position = short_position
         self.trading_days = trading_days
         self.variable_list = f_list
         # import close data
@@ -187,9 +199,11 @@ class context(object):
         df.sort_values(['Date'],inplace=True)
         df.set_index(['Date'], inplace=True, drop=True)
         #trnasfer column which contains char to num
-        degree = df['quant_grade'].value_counts().index
+        degree = df['quant_grade'].value_counts().index.values
+        degree.sort()
+
         s = 1.0
-        for grade in degree.values:
+        for grade in degree:
             df.loc[df['quant_grade']==grade,'quant_grade'] = s
             s+=1
 
@@ -377,8 +391,8 @@ class context(object):
                     if self.extract_train(cur_date,horizon,select_method,top_per,bottom_per,roll=roll,):
                         if np.shape(self.x_test)[0]>0:
                             test_y,_ = strats.model(model_name, self.x_train, self.y_train, self.x_test)
-                            weight_new_temp,flag = order_method(test_y,\
-                                                                self.context_dict,cur_date, remove, bottom_thre,top_thre)
+                            weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
+                                                        self.context_dict,cur_date, remove, bottom_thre,top_thre)
                             if flag:
                                 weight_new = weight_new_temp
                                 print(str(df.index[s - 1])[:10],\
