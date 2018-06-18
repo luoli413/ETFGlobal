@@ -78,12 +78,12 @@ if __name__ == "__main__":
     long_position = 1.5
     short_position = 1- long_position
     # end_day = -1 # -1 means till today
-    start_day = '2012-01-01'
+    start_day = '2017-01-01'
     trading_days = 252.0
     horizon = 21*2
     freq = 21*2  #rebalance monthly
     roll = 12  # rolling in 12 months
-    ben = 'ben'
+    ben = 'ACWI' #benchmark
     model_name = 'SVR'
     relative = True
     bottom_thre = 0.2

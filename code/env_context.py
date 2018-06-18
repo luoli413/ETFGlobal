@@ -12,7 +12,7 @@ res_path = os.path.join(path+ '\\res\\')
 
 def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1):
     # columns needed
-    col = ['ben', 'nav', 'rebalancing', 'stoploss', 'Interest_rate']
+    col = [ben, 'nav', 'rebalancing', 'stoploss', 'Interest_rate']
     # df = self.book
     df_valid = df.loc[:, col]
     start_balance = df.index[df['rebalancing'] == 1][0]
@@ -68,6 +68,7 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
                                   pd.Series(wins, index=df_valid.index).expanding(min_periods=2).apply(len)
     # Transfer infs to NA
     df_valid.loc[np.isinf(df_valid.loc[:, 'sharpe']), 'sharpe'] = np.nan
+    df_valid.loc[np.isinf(df_valid.loc[:, ben+'_sharpe']), 'sharpe'] = np.nan
     df_valid.loc[np.isinf(df_valid.loc[:, 'IR']), 'IR'] = np.nan
     # hit_rate
     wins = np.where(df_valid['return'] >= df_valid[
@@ -360,7 +361,7 @@ class context(object):
                   top_per = 0,bottom_per=20,bottom_thre=1.0,top_thre=0.0,roll=-1,):
         # initial setting
         df = self.context_dict['close'].copy()
-        symbols = self.context_dict['close'].columns[1:]
+        symbols = self.context_dict['close'].columns[:]
         # cols = self.context_dict['close'].columns.values
         # cols[0]='zz500'
         # cols[1]='hs300'

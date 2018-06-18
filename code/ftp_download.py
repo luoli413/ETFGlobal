@@ -12,8 +12,8 @@ ana_path = os.path.join(path+'\\analytics\\')
 
 def download_data(today):
     # download the dir of ftp file
-    # web = "ftp://nyu_project:zkGUXJ6atHLH@ftp1.etfg.com/analytics"
-    # urllib.request.urlretrieve(web,"list.txt")
+    web = "ftp://nyu_project:zkGUXJ6atHLH@ftp1.etfg.com/analytics"
+    urllib.request.urlretrieve(web,"list.txt")
     # read dir to find the name of list of all data
     f = open("list.txt","r")
     n = f.read()
@@ -42,7 +42,7 @@ def download_data(today):
     #     loc_file = "analytics/" + file
     #     urllib.request.urlretrieve(url, loc_file)
     #     print('.', end='', flush=True)
-    # print('ftp downloading completed')
+    # print('\n'+'ftp downloading completed')
 
     yf.pdr_override()
     #read etf ticks from the first file in order to cover the whole ETFs in the latest data
@@ -54,13 +54,17 @@ def download_data(today):
         file = textstr+'_'+\
                datetime.datetime.strptime(datestr,'%Y-%m-%d').strftime(format = '%Y%m%d')+'.csv'
 
-    first_file = ana_path+ file
+    first_file = ana_path + file
     f = pd.read_csv(first_file, header = None)
-    col = ['sp500']+f[1].values# fetch ticker names
+    col = f[1].values# fetch ticker names
     close = pd.DataFrame()
     volume = pd.DataFrame()
     for tick in col:
-        data = pdr.get_data_yahoo(tick,start="2012-02-01", end=today)
+        try:
+           data = pdr.get_data_yahoo(tick,start="2012-02-01", end=today)
+        except:
+           print(tick)
+           print('?')
         if "Adj Close" in data:
             close[tick] = data["Adj Close"]
         else:
@@ -92,4 +96,3 @@ def data_processing():
     volume.to_csv(data_path+'volume.csv')
     print('preprocessing completed!')
 
-# if __name__ == "__main__":
