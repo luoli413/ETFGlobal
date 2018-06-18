@@ -35,9 +35,11 @@ def fix_stock_order(order_case):
         pool_long,pool_short = order_case(test_y,*args)
         if len(pool_long)>0:
             weight_new.loc[pool_long] = long_position / len(pool_long)
+            print(len(pool_long))
         if len(pool_short)>0:
-            weight_new.loc[pool_short] = short_position/len(pool_short)
-        if len(pool_long)<=0 & len(pool_short)<=0:
+            weight_new.loc[pool_short] = short_position / len(pool_short)
+            print(len(pool_short))
+        if len(pool_long)<=0 & len(pool_short) <= 0:
             # equally-weighted portfolio with all stocks in test_y
            weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
 
@@ -62,7 +64,7 @@ def order_method(test_y,context_dict,cur_date,remove,bottom_thre=1.0,top_thre=0.
     pool2 = test_y[test_y > test_y.quantile(q= top_thre)]
     pool_short = pool2.loc[pool1.index].index.values
 
-    # case 4
+    # case ??
     # indicator = test_y.loc[:,~np.isin(test_y.columns,remove)]
     # flag = indicator.apply(layer,args=(1-bottom_thre,1-top_thre,),axis =0)
     #
@@ -72,21 +74,21 @@ def order_method(test_y,context_dict,cur_date,remove,bottom_thre=1.0,top_thre=0.
 
 if __name__ == "__main__":
     # parameters initialization
-    variable_list = ['quant_technical_st','quant_technical_it', 'quant_technical_lt','quant_grade',\
-                     'quant_fundamental_pe', 'quant_fundamental_pcf', 'quant_fundamental_pb',]
+    variable_list = ['quant_technical_st','quant_technical_it', 'quant_technical_lt','quant_fundamental_pb',\
+                     'quant_fundamental_pe', 'quant_fundamental_pcf','quant_fundamental_div','risk_volatility']
     leverage = 0.95
     long_position = 1.5
-    short_position = 1- long_position
+    short_position = 1 - long_position
     # end_day = -1 # -1 means till today
-    start_day = '2017-01-01'
+    start_day = '2012-01-01'
     trading_days = 252.0
-    horizon = 21*2
-    freq = 21*2  #rebalance monthly
-    roll = 12  # rolling in 12 months
-    ben = 'ACWI' #benchmark
+    horizon = 21*1
+    freq = 21*1  # rebalance monthly
+    roll = 9  # rolling in 12 months
+    ben = 'ACWI' # benchmark
     model_name = 'SVR'
     relative = True
-    bottom_thre = 0.2
+    bottom_thre = 0.1
     top_thre = 0.0
 
     # Back-test initialization
@@ -95,7 +97,8 @@ if __name__ == "__main__":
     #  variable list or other parameters.
     context.generate_train(variable_list,horizon, relative, ben, normalize=True)
     # Name the results using parameters and so on
-    address = 'etf_'+ '_short20%_' + model_name + '_'+str(roll)+'.csv'
+    address = 'etf_'+ 'short'+str(short_position)[:5]+'_' + model_name + \
+              '_'+str(bottom_thre)+'_'+str(roll)+'.csv'
     context.back_test(ben, horizon, freq, model_name, address, select_stocks, order_method,\
                       bottom_thre=bottom_thre,top_thre = top_thre,roll=roll)
 

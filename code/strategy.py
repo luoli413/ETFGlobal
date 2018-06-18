@@ -63,6 +63,12 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
         xx = sm.add_constant(test_x.loc[:,final_feature])
         test_y = res.predict(xx)
 
+    if model_name == 'AdaBoost':
+        from sklearn.ensemble import  AdaBoostRegressor
+        model = AdaBoostRegressor(n_estimators=100,learning_rate = 0.1)
+        adaboost = model.fit(train_x,train_y)
+        test_y = pd.Series(adaboost.predict(test_x),index = test_x.index)
+
     return test_y,summary
 
 
@@ -84,6 +90,7 @@ def selecting(select_step):
                 temp = fd.columns[flag_zero & flag_nan].values
                 symbols = list(set(symbols).intersection(set(temp)))
             s += 1
+        # print(len(symbols),' stocks can be traded.')
         return select_step(symbols,context_dict,f_calendar,*args, **kwargs)
 
     return wrapper

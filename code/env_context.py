@@ -68,7 +68,7 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
                                   pd.Series(wins, index=df_valid.index).expanding(min_periods=2).apply(len)
     # Transfer infs to NA
     df_valid.loc[np.isinf(df_valid.loc[:, 'sharpe']), 'sharpe'] = np.nan
-    df_valid.loc[np.isinf(df_valid.loc[:, ben+'_sharpe']), 'sharpe'] = np.nan
+    df_valid.loc[np.isinf(df_valid.loc[:, ben+'_sharpe']), ben+'_sharpe'] = np.nan
     df_valid.loc[np.isinf(df_valid.loc[:, 'IR']), 'IR'] = np.nan
     # hit_rate
     wins = np.where(df_valid['return'] >= df_valid[
@@ -353,7 +353,7 @@ class context(object):
                         x_test.drop(['y'],axis = 1,inplace =True)
                         x_test.dropna(how='any', axis=0,inplace=True)
                         self.x_test = x_test
-                        # print(x_test.shape)
+
                         bool = True
         return bool
 
