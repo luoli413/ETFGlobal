@@ -3,7 +3,7 @@ import numpy as np
 
 # Please add models here!!!
 def model(model_name, train_x, train_y, test_x,alpha = 0.1):
-    summary=[]
+    summary = []
     from sklearn.neural_network import MLPRegressor
     from sklearn.svm import SVR
     import sklearn
@@ -18,10 +18,10 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
         y_pred = mlp.predict(test_x)
         test_y = pd.Series(y_pred, index=test_x.index)
     if model_name == 'Lasso':
-        model = sklearn.linear_model.Lasso(0.001)
+        model = sklearn.linear_model.Lasso(0.001,fit_intercept = False)
         lasso = model.fit(train_x, train_y)
         test_y = pd.Series(lasso.predict(test_x), index=test_x.index)
-
+        summary = lasso.score(train_x,train_y)
     if model_name == 'Ridge':
         model = sklearn.linear_model.Ridge(50)
         ridge = model.fit(train_x, train_y)

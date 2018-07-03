@@ -212,7 +212,7 @@ class context(object):
         self.features.to_csv('feature.csv')
         print('import features completed!')
 
-    def generate_train(self,f_list,horizon,relative,ben,normalize = False):
+    def generate_train(self,horizon,relative,ben,normalize = False):
 
         v_list = ['tic'] + self.variable_list
         fd_data = self.features[v_list].copy()
@@ -223,7 +223,8 @@ class context(object):
             p_data = p_data[pd.to_datetime(p_data.index) <= end_day]
             fd_data = fd_data[pd.to_datetime(fd_data.index) <= end_day]
         f_calendar = fd_data.index.drop_duplicates()
-        symbols = p_data.columns.values
+        cols = p_data.columns
+        symbols = cols[cols!= ben].values
         fd_data = fd_data[np.isin(fd_data['tic'],symbols)]
 
         # ===== Deal with Y: future returns
@@ -362,6 +363,7 @@ class context(object):
         # initial setting
         df = self.context_dict['close'].copy()
         symbols = self.context_dict['close'].columns[:]
+        symbols = symbols[symbols!= ben]
         # cols = self.context_dict['close'].columns.values
         # cols[0]='zz500'
         # cols[1]='hs300'
@@ -391,17 +393,17 @@ class context(object):
                     # print(s)
                     if self.extract_train(cur_date,horizon,select_method,top_per,bottom_per,roll=roll,):
                         if np.shape(self.x_test)[0]>0:
-                            test_y,_ = strats.model(model_name, self.x_train, self.y_train, self.x_test)
+                            test_y,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
                                                         self.context_dict,cur_date, remove, bottom_thre,top_thre)
                             if flag:
+
                                 weight_new = weight_new_temp
                                 print(str(df.index[s - 1])[:10],\
                                       len(weight_new[weight_new != 0]),'stocks in portfolio')
                                 # print(weight_new[weight_new != 0].head())
                                 weights.loc[df.index[s - 1],:] = 0.0
                                 weights.loc[df.index[s - 1], weight_new.index] = weight_new.values
-                                # print('*' * 50)
                                 df['rebalancing'].iloc[s - 1] = 1
                                 reb_index = s - 1
 
@@ -461,26 +463,50 @@ class context(object):
     #     if self.extract_train(cur_date,horizon,select_method,top_per=0,bottom_per=100,roll=roll):
     #         temp,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
     #     return summary
-    #
-    # def integrate_summary(self,horizon):
-    #     integrate_summary = pd.DataFrame(np.zeros((11,2))[:],\
-    #                     index = self.variable_list + ['const','f_test','missing_inds'],\
-    #                                      columns=['p_value_average', 'num'])
-    #     missing = []
-    #     for ind in self.ind_dict.keys():
-    #
-    #         temp = pd.read_csv(res_path+str(self.ind_dict[ind])+'_'+str(horizon)\
-    #                            +'_summary.csv',header=None)
-    #         temp.set_index([0],drop=True,inplace=True)
-    #         integrate_summary.loc[temp.index.values, 'num'] += 1
-    #         ss = integrate_summary.loc[temp.index.values, 'num']
-    #         integrate_summary.loc[temp.index.values,'p_value_average']\
-    #             = (ss-1.0)/ss*integrate_summary.loc[temp.index,'p_value_average'] + 1.0/ss*temp.iloc[:,0]
-    #         if 'f_test' not in temp.index.values:
-    #             missing.append(ind)
-    #     integrate_summary = integrate_summary.astype('object')
-    #     integrate_summary.at['missing_inds','num'] = missing
-    #     integrate_summary.to_excel(res_path+'ind_summary_'+str(horizon)+'.xlsx')
+
+    def integrate_summary(self,horizon,freq,model_name,select_method, \
+                      top_per=0, bottom_per=20, bottom_thre=1.0, top_thre=0.0, roll=-1,):
+
+        v_len = len(self.variable_list)
+        integrate_summary = pd.DataFrame(np.zeros((v_len+3,2)),\
+                        index = self.variable_list + ['const','f_test','missing_rebalance'],\
+                                         columns=['p_value_average', 'num'])
+        missing = []
+        # def back_test(self, ben, horizon, freq, model_name,  ):
+        # initial setting
+        df = self.context_dict['close'].copy()
+
+        back_testing = df.index[pd.to_datetime(df.index) >= pd.to_datetime(self.start_day)]
+
+        s = 0  # counting date
+        # ============================= Enter Back-testing ===================================
+        for cur_date in back_testing.values:
+
+            cur_date = pd.to_datetime(cur_date)
+            # rebalance in a fixed frequency in freq rate
+            if s > 0:  # begin to rebalance at least after the second recordings
+                if np.mod(s, freq) == 0:
+
+                    if self.extract_train(cur_date, horizon, select_method, top_per, bottom_per, roll=roll,):
+                        if np.shape(self.x_test)[0] > 0:
+                            test_y, summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
+                            # weight_new_temp, flag = order_method(test_y, self.long_position, self.short_position, \
+                            #                                      self.context_dict, cur_date, remove, bottom_thre,
+                            #                                      top_thre)
+                            temp = summary
+                            # temp.set_index([0], drop=True, inplace=True)
+                            integrate_summary.loc[temp.index.values, 'num'] += 1
+                            ss = integrate_summary.loc[temp.index.values, 'num']
+                            integrate_summary.loc[temp.index.values, 'p_value_average'] \
+                                = (ss - 1.0) / ss * integrate_summary.loc[\
+                                temp.index, 'p_value_average'] + 1.0 / ss * temp.iloc[:]
+                            if 'f_test' not in temp.index.values:
+                                missing.append(cur_date)
+            s+=1
+        integrate_summary = integrate_summary.astype('object')
+        integrate_summary.at['missing_rebalance', 'num'] = missing
+        integrate_summary.to_csv(res_path + 'inds_summary_all_' + str(horizon) +'_'+str(roll)+'.csv')
+
     # def feature_indus_filter(self,inds,):
     #     inds_num = []
     #     for ind in inds:

@@ -23,26 +23,26 @@ def download_data(today):
         word = row.split(" ")
         if ".csv" in word[-1]:
             file_list.append(word[-1])
-    # # #create the directory to save the downloading file
-    # if os.path.isdir("analytics"):
-    #     pass
-    # else:
-    #     os.mkdir("analytics")
-    #
-    # # # download all file to certain directory
-    # for file in file_list:
-    #     url = web + '/'+file
-    #     # loc_file = "analytics/" + file
-    #     if file[0]!='a':
-    #         loc_a = file.find('a')
-    #         textstr = file[loc_a:file.find('.')]
-    #         datestr = file[:loc_a-1]
-    #         file = textstr+'_'+\
-    #                datetime.datetime.strptime(datestr,'%Y-%m-%d').strftime(format = '%Y%m%d')+'.csv'
-    #     loc_file = "analytics/" + file
-    #     urllib.request.urlretrieve(url, loc_file)
-    #     print('.', end='', flush=True)
-    # print('\n'+'ftp downloading completed')
+    # #create the directory to save the downloading file
+    if os.path.isdir("analytics"):
+        pass
+    else:
+        os.mkdir("analytics")
+
+    # # download all file to certain directory
+    for file in file_list:
+        url = web + '/'+file
+        # loc_file = "analytics/" + file
+        if file[0]!='a':
+            loc_a = file.find('a')
+            textstr = file[loc_a:file.find('.')]
+            datestr = file[:loc_a-1]
+            file = textstr+'_'+\
+                   datetime.datetime.strptime(datestr,'%Y-%m-%d').strftime(format = '%Y%m%d')+'.csv'
+        loc_file = "analytics/" + file
+        urllib.request.urlretrieve(url, loc_file)
+        print('.', end='', flush=True)
+    print('\n'+'ftp downloading completed')
 
     yf.pdr_override()
     #read etf ticks from the first file in order to cover the whole ETFs in the latest data
