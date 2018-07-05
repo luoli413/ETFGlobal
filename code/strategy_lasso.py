@@ -32,13 +32,13 @@ def fix_stock_order(order_case):
         weight_new = pd.Series(np.zeros(test_y.shape[0]), index=test_y.index)
         flag = True
         pool_long,pool_short = order_case(test_y,*args)
-        if len(pool_long)>0:
+        if (len(pool_long)>0) & (long_position != 0):
             weight_new.loc[pool_long] = long_position / len(pool_long)
             # print(len(pool_long))
-        if len(pool_short)>0:
+        if (len(pool_short)>0) & (short_position !=0) :
             weight_new.loc[pool_short] = short_position / len(pool_short)
             # print(len(pool_short))
-        if len(pool_long)<=0 & len(pool_short) <= 0:
+        if (len(pool_long)<=0) & (len(pool_short) <= 0):
             # equally-weighted portfolio with all stocks in test_y
            weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
 
@@ -60,12 +60,14 @@ def order_method(test_y,context_dict,cur_date,remove,bottom_thre=1.0,top_thre=0.
     if len(list(set(pool1.index.values).intersection(set(pool2.index.values))))>0:
         temp = pool2.loc[pool1.index]
         pool_long = temp[temp>0].index.values
+        # pool_long =temp.index.values
     # add short position
     pool1 = test_y[test_y <= test_y.quantile(q= bottom_thre)]
     pool2 = test_y[test_y > test_y.quantile(q= top_thre)]
     if len(list(set(pool1.index.values).intersection(set(pool2.index.values)))) > 0:
         temp = pool2.loc[pool1.index]
         pool_short = temp[temp<0].index.values
+        # pool_short = temp.index.values
 
     # case ??
     # indicator = test_y.loc[:,~np.isin(test_y.columns,remove)]
@@ -93,7 +95,7 @@ if __name__ == "__main__":
     interest_rate = 0.0
     horizon = 21*1 # prediction horizon
     freq = 21*1  # rebalance monthly
-    roll = 1 # rolling in x months
+    roll = 12 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'Lasso'
     relative = True
@@ -104,10 +106,10 @@ if __name__ == "__main__":
     context = context(start_day,leverage,long_position,short_position,interest_rate,trading_days,variable_list,)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
-    context.generate_train(horizon, relative, ben, normalize=True)
+    # context.generate_train(horizon, relative, ben, normalize=True)
     # Name the results using parameters and so on
     address = 'etf_T_'+ 'short'+str(round(short_position,1))+'_' + model_name +'_'+str(top_thre)+ \
-              '_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'_test.csv'
+              '_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'_daily.csv'
     context.back_test(ben, horizon, freq, model_name, address, select_stocks, order_method,\
                       bottom_thre=bottom_thre,top_thre = top_thre,roll=roll)
 

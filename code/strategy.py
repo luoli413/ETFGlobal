@@ -11,7 +11,7 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
     if model_name == 'Random':
         test_y = pd.Series(np.random.random_sample((len(test_x),)), index=test_x.index)
     if model_name == 'None':
-        test_y = test_x.iloc[:,:]
+        test_y = test_x.iloc[:,0]
     if model_name == 'MLPRegressor':
         mlp = MLPRegressor(hidden_layer_sizes=(20, 20))
         mlp.fit(train_x, train_y)

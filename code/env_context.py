@@ -17,7 +17,8 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
     start_balance = df.index[df['rebalancing'] == 1][0]
     df_valid = df_valid[pd.to_datetime(df_valid.index) >= \
                         pd.to_datetime(start_balance)]
-
+    # average socre of models in training set
+    df_valid['ave_score'] = df['summary_score'].expanding(min_periods=1).apply(lambda x: np.nanmean(x))
     # daily return
     df_valid['return'] = (df['nav'] - df['nav'].shift(1))/ df['nav'].shift(1)
     # benchmark_net_value
@@ -199,7 +200,7 @@ class context(object):
         df['Date'] = pd.to_datetime(df['Date'],format ="%Y%m%d")
         df.sort_values(['Date'],inplace=True)
         df.set_index(['Date'], inplace=True, drop=True)
-        #trnasfer column which contains char to num
+        #transfer column which contains char to num
         degree = df['quant_grade'].value_counts().index.values
         degree.sort()
 

@@ -85,9 +85,9 @@ if __name__ == "__main__":
     start_day = '2012-01-01'
     trading_days = 252.0
     interest_rate = 0.0
-    horizon = 21*3
+    horizon = 21*1
     freq = 21*1  # rebalance monthly
-    roll = 9 # rolling in x months
+    roll = 3 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'StepWise'
     relative = True
