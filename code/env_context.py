@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 import os
-import utils as ut
 import strategy as strats
 import datetime
 path = os.getcwd()
@@ -12,7 +11,7 @@ res_path = os.path.join(path+ '\\res\\')
 
 def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1):
     # columns needed
-    col = [ben, 'nav', 'rebalancing', 'stoploss', 'Interest_rate']
+    col = [ben, 'nav', 'rebalancing','summary_score', 'stoploss', 'Interest_rate']
     # df = self.book
     df_valid = df.loc[:, col]
     start_balance = df.index[df['rebalancing'] == 1][0]
@@ -133,7 +132,7 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
     df_valid.to_csv(save_address)
 
 class context(object):
-    def __init__(self,start_day,leverage,long_position,short_position,\
+    def __init__(self,start_day,leverage,long_position,short_position,interest_rate,\
                  trading_days,f_list,end_day=-1,method='monthly'):
 
         headers = pd.read_csv(ana_path+'headers_analytics.csv')
@@ -146,6 +145,7 @@ class context(object):
         self.short_position = short_position
         self.trading_days = trading_days
         self.variable_list = f_list
+        self.interest_rate = interest_rate
         # import close data
         self.context_dict = dict()
         for i in self.trading_data_list:
@@ -211,6 +211,51 @@ class context(object):
         self.features = df.loc[:,['Date','tic']+self.variable_list]
         self.features.to_csv('feature.csv')
         print('import features completed!')
+
+    def book(self,df,weights,weight_new,stats_summary=None,rebalance_flag = False):
+
+        def record_weights(df, i, weights):
+            return_vector = (df.iloc[i, :][weights.columns] - df.iloc[i - 1, :][weights.columns]) \
+                            / df.iloc[i - 1, :][weights.columns]
+            #   if the stock had not listed in market or no data available,we need set the return as zero
+            return_vector[return_vector.isnull()] = 0.0
+            sum_return = np.dot(return_vector, weights.iloc[i - 1, :].values)
+            every_re = np.multiply(weights.iloc[i - 1, :], (return_vector + 1))
+            weights.iloc[i, :] = every_re / (1 + sum_return)
+
+            return weights
+
+        def record_return(df, i, reb_index, weight_new, leverage, trading_days=252.0,interest_rate=0.0):
+            return_vector = (df.iloc[i, :][weight_new.index.values] - \
+                             df.iloc[reb_index, :][weight_new.index.values]) / \
+                            df.iloc[reb_index, :][weight_new.index.values]
+            return_vector[return_vector.isnull()] = 0.0  # no trade,then no return
+            cum_return = np.dot(return_vector, weight_new.values)
+            df['nav'].iloc[i] = df['nav'].iloc[reb_index] * (\
+                1 + cum_return * leverage + (1 - leverage) * (i - reb_index)* interest_rate / trading_days / 100)
+            return df
+
+        if rebalance_flag:
+
+            print(str(df.index[self.s - 1])[:10], \
+                  len(weight_new[weight_new != 0]), 'stocks in portfolio')
+            # print(weight_new[weight_new != 0].head())
+            weights.loc[df.index[self.s - 1], :] = 0.0
+            weights.loc[df.index[self.s - 1], weight_new.index] = weight_new.values
+            df['rebalancing'].iloc[self.s - 1] = 1
+            if stats_summary is None:
+                pass
+            elif isinstance(stats_summary, pd.Series):
+                df['summary_score'].iloc[self.s - 1] = stats_summary['score']
+            else:
+                df['summary_score'].iloc[self.s - 1] = stats_summary
+            self.reb_index = self.s - 1
+        else:
+            df = record_return(df, self.s, self.reb_index, weight_new, \
+                               self.leverage, self.trading_days,self.interest_rate)
+            weights = record_weights(df, self.s, weights)
+
+        return df,weights
 
     def generate_train(self,horizon,relative,ben,normalize = False):
 
@@ -376,42 +421,35 @@ class context(object):
         df['rebalancing'] = pd.Series()
         df['stoploss'] = pd.Series()
         df['nav'] = pd.Series(unit, index=df.index)
-        df['Interest_rate'] = pd.Series(np.full((len(df.index),), 2.5),index=df.index) # 2.5% interest_rate
+        df['Interest_rate'] = pd.Series(np.full((len(df.index),), self.interest_rate),index=df.index)
+        df['summary_score'] = pd.Series()
         weight_new = []
         # max_new = []  # for computing max_drawdown
         unit = np.full((len(df.index), stock_num), 0)
         weights = pd.DataFrame(unit, index=df.index, columns=symbols)
-        reb_index = 0
-        s = 0  # counting date
+        self.reb_index = 0
+        self.s = 0  # counting date
         # ============================= Enter Back-testing ===================================
         for cur_date in back_testing.values:
 
             cur_date = pd.to_datetime(cur_date)
             # rebalance in a fixed frequency in freq rate
-            if s>0:# begin to rebalance at least after the second recordings
-                if np.mod(s, freq) == 0:
-                    # print(s)
+            if self.s>0:# begin to rebalance at least after the second recordings
+                if np.mod(self.s, freq) == 0:
+
                     if self.extract_train(cur_date,horizon,select_method,top_per,bottom_per,roll=roll,):
                         if np.shape(self.x_test)[0]>0:
                             test_y,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
                                                         self.context_dict,cur_date, remove, bottom_thre,top_thre)
                             if flag:
-
                                 weight_new = weight_new_temp
-                                print(str(df.index[s - 1])[:10],\
-                                      len(weight_new[weight_new != 0]),'stocks in portfolio')
-                                # print(weight_new[weight_new != 0].head())
-                                weights.loc[df.index[s - 1],:] = 0.0
-                                weights.loc[df.index[s - 1], weight_new.index] = weight_new.values
-                                df['rebalancing'].iloc[s - 1] = 1
-                                reb_index = s - 1
+                                df,weights = self.book(df,weights,weight_new,summary,flag)
 
-                if len(weight_new) != 0:
-                    df = ut.record_return(df, s, reb_index, weight_new, self.leverage, self.trading_days)
-                    weights = ut.record_weights(df, s, weights)
+            if len(weight_new) != 0:
+                df,weights = self.book(df,weights,weight_new)
 
-            s += 1
+            self.s += 1
         if np.shape(df[df['rebalancing']==1])[0]>1:
             compute_indicators(df, ben,res_path+'perf_'+address,self.trading_days)
             weights.to_csv(res_path+'weights_' + address)
@@ -468,8 +506,8 @@ class context(object):
                       top_per=0, bottom_per=20, bottom_thre=1.0, top_thre=0.0, roll=-1,):
 
         v_len = len(self.variable_list)
-        integrate_summary = pd.DataFrame(np.zeros((v_len+3,2)),\
-                        index = self.variable_list + ['const','f_test','missing_rebalance'],\
+        integrate_summary = pd.DataFrame(np.zeros((v_len+4,2)),\
+                        index = self.variable_list + ['const','f_test','score','missing_rebalance'],\
                                          columns=['p_value_average', 'num'])
         missing = []
         # def back_test(self, ben, horizon, freq, model_name,  ):

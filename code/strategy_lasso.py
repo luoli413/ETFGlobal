@@ -78,31 +78,36 @@ def order_method(test_y,context_dict,cur_date,remove,bottom_thre=1.0,top_thre=0.
 if __name__ == "__main__":
 
     # parameters initialization
+    # variable_list = ['quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
+    #                  'quant_fundamental_pe','quant_fundamental_pb','quant_global_sector','quant_global_country',\
+    #                  'quant_fundamental_div','quant_quality_liquidity']
     variable_list = ['quant_technical_st','quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
-                     'quant_fundamental_pe','quant_global_sector','quant_global_country',]
-    leverage = 0.95
-    long_position = 1.5
-    short_position = 1.0 - long_position
+                         'quant_fundamental_pe','quant_global_sector','quant_global_country',]
+
+    long_position = 1.0
+    short_position = -0.2
+    leverage = 1.0
     # end_day = -1 # -1 means till today
     start_day = '2012-01-01'
     trading_days = 252.0
-    horizon = 21*1
+    interest_rate = 0.0
+    horizon = 21*1 # prediction horizon
     freq = 21*1  # rebalance monthly
-    roll = 12  # rolling in x months
+    roll = 1 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'Lasso'
     relative = True
-    bottom_thre = 0.2
+    bottom_thre = 0.1  # top10%
     top_thre = 0.0
 
     # Back-test initialization
-    context = context(start_day,leverage,long_position,short_position,trading_days,variable_list,)
+    context = context(start_day,leverage,long_position,short_position,interest_rate,trading_days,variable_list,)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
-    # context.generate_train(horizon, relative, ben, normalize=True)
+    context.generate_train(horizon, relative, ben, normalize=True)
     # Name the results using parameters and so on
     address = 'etf_T_'+ 'short'+str(round(short_position,1))+'_' + model_name +'_'+str(top_thre)+ \
-              '_'+str(bottom_thre)+'_'+str(roll)+'.csv'
+              '_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'_test.csv'
     context.back_test(ben, horizon, freq, model_name, address, select_stocks, order_method,\
                       bottom_thre=bottom_thre,top_thre = top_thre,roll=roll)
 

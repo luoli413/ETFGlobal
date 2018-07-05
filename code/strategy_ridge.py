@@ -86,9 +86,10 @@ if __name__ == "__main__":
     # end_day = -1 # -1 means till today
     start_day = '2012-01-01'
     trading_days = 252.0
+    interest_rate = 0.0
     horizon = 21*1
     freq = 21*1  # rebalance monthly
-    roll = 12  # rolling in x months
+    roll = 9  # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'Ridge'
     relative = False
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     top_thre = 0.0
 
     # Back-test initialization
-    context = context(start_day,leverage,long_position,short_position,trading_days,variable_list,)
+    context = context(start_day, leverage, long_position, short_position, interest_rate, trading_days, variable_list, )
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
     context.generate_train(horizon, relative, ben, normalize=True)

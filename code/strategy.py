@@ -3,7 +3,7 @@ import numpy as np
 
 # Please add models here!!!
 def model(model_name, train_x, train_y, test_x,alpha = 0.1):
-    summary = []
+    summary = None
     from sklearn.neural_network import MLPRegressor
     from sklearn.svm import SVR
     import sklearn
@@ -60,6 +60,8 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
         summary = pd.Series(res.pvalues, index=['const'] + final_feature)
         if ~np.isnan(res.f_pvalue):
             summary['f_test'] = res.f_pvalue
+        if ~np.isnan(res.rsquared_adj):
+            summary['score'] = res.rsquared_adj
         xx = sm.add_constant(test_x.loc[:,final_feature])
         test_y = res.predict(xx)
 
