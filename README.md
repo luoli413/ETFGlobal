@@ -1,6 +1,7 @@
 # ETFGlobal
 Here are some instructions:
-
+## data
+Since this is a project that I'm working with a company, I built up a data IO to get special data from ftp owned by this company.
 ## infrastructure
 env_context.py contains back-testing infrastructures.
 strategy.py has some models and later we can add other models here.
