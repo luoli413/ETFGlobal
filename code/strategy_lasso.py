@@ -80,14 +80,15 @@ def order_method(test_y,context_dict,cur_date,remove,bottom_thre=1.0,top_thre=0.
 if __name__ == "__main__":
 
     # parameters initialization
-    # variable_list = ['quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
+    # variable_list_3months = ['quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
     #                  'quant_fundamental_pe','quant_fundamental_pb','quant_global_sector','quant_global_country',\
     #                  'quant_fundamental_div','quant_quality_liquidity']
     variable_list = ['quant_technical_st','quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
-                         'quant_fundamental_pe','quant_global_sector','quant_global_country',]
+                     'quant_sentiment_si','quant_fundamental_pe','quant_fundamental_div','quant_global_sector',\
+                     'quant_global_country','quant_quality_liquidity','quant_quality_firm',]
 
-    long_position = 1.0
-    short_position = -0.2
+    long_position = 1.3
+    short_position = -0.5
     leverage = 1.0
     # end_day = -1 # -1 means till today
     start_day = '2012-01-01'
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     interest_rate = 0.0
     horizon = 21*1 # prediction horizon
     freq = 21*1  # rebalance monthly
-    roll = 12 # rolling in x months
+    roll = -1 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'Lasso'
     relative = True
@@ -108,8 +109,8 @@ if __name__ == "__main__":
     #  variable list or other parameters.
     # context.generate_train(horizon, relative, ben, normalize=True)
     # Name the results using parameters and so on
-    address = 'etf_T_'+ 'short'+str(round(short_position,1))+'_' + model_name +'_'+str(top_thre)+ \
-              '_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'_daily.csv'
+    address = 'etf_T_0.001_long'+str(round(long_position,1))+'_'+ 'short'+str(round(short_position,1))+\
+              '_' + model_name +'_'+str(top_thre)+'_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'_daily.csv'
     context.back_test(ben, horizon, freq, model_name, address, select_stocks, order_method,\
                       bottom_thre=bottom_thre,top_thre = top_thre,roll=roll)
 
