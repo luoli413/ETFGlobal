@@ -19,6 +19,7 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
                         pd.to_datetime(start_balance)]
     # average socre of models in training set
     df_valid['ave_score'] = df['summary_score'].expanding(min_periods=1).apply(lambda x: np.nanmean(x))
+    df_valid['summary_score'] = df_valid['summary_score'].fillna(method='ffill')
     # daily return
     df_valid['return'] = (df['nav'] - df['nav'].shift(1))/ df['nav'].shift(1)
     # benchmark_net_value
@@ -133,6 +134,46 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
     df_valid.to_csv(save_address)
 
 class context(object):
+
+    def get_data_monthly(self):
+        df = pd.DataFrame()
+        close_df = self.context_dict['close']
+        close_df = close_df[close_df.index >= pd.to_datetime(self.start_day)]
+        if self.end_day != -1:
+            close_df = close_df[close_df.index <= pd.to_datetime(self.end_day)]
+        f_calendar = close_df.index.values
+        s = 0
+        previous_month = datetime.datetime.strptime(str(close_df.index[0])[:10], "%Y-%m-%d").month
+        for date in f_calendar:
+            date = datetime.datetime.strptime(str(date)[:10], "%Y-%m-%d")
+            this_month = date.month
+            if s == 0:
+                file = ana_path + 'analytics_' + date.strftime("%Y%m%d") + '.csv'
+            else:
+                if previous_month == this_month:
+                    previous_month = this_month
+                    s += 1
+                    continue
+                else:
+                    file = ana_path + 'analytics_' + date.strftime("%Y%m%d") + '.csv'
+
+            if os.path.isfile(file):
+                ana_df = pd.read_csv(file, header=None, )
+                if df.empty:
+                    df = ana_df
+                else:
+                    df = pd.concat([df, ana_df])
+            else:
+                continue
+            s += 1
+            previous_month = this_month
+
+        df.columns = ['Date', 'tic'] + list(self.feature_name)
+        df['Date'] = pd.to_datetime(df['Date'], format="%Y%m%d")
+        df.sort_values(['Date'], inplace=True)
+        df.set_index(['Date'], inplace=True, drop=True)
+        return df
+
     def __init__(self,start_day,leverage,long_position,short_position,interest_rate,\
                  trading_days,f_list,end_day=-1,method='monthly'):
 
@@ -163,44 +204,9 @@ class context(object):
             self.context_dict[i] = temp
         print('import trading data completed!')
         # import features
-        df = pd.DataFrame()
-        if method =='monthly':
-            close_df = self.context_dict['close']
-            close_df = close_df[close_df.index>=pd.to_datetime(self.start_day)]
-            if self.end_day!=-1:
-                close_df = close_df[close_df.index<=pd.to_datetime(self.end_day)]
-            f_calendar = close_df.index.values
-            s=0
-            previous_month = datetime.datetime.strptime(str(close_df.index[0])[:10],"%Y-%m-%d").month
-            for date in f_calendar:
-                date = datetime.datetime.strptime(str(date)[:10], "%Y-%m-%d")
-                this_month = date.month
-                if s==0:
-                    file = ana_path+'analytics_' + date.strftime("%Y%m%d") + '.csv'
-                else:
-                    if previous_month == this_month:
-                        previous_month = this_month
-                        s+=1
-                        continue
-                    else:
-                        file = ana_path +'analytics_' + date.strftime("%Y%m%d") + '.csv'
-
-                if os.path.isfile(file):
-                    ana_df = pd.read_csv(file, header=None,)
-                    if df.empty:
-                        df = ana_df
-                    else:
-                        df = pd.concat([df,ana_df])
-                else:
-                    continue
-                s+=1
-                previous_month = this_month
-
-        df.columns = ['Date','tic'] + list(self.feature_name)
-        df['Date'] = pd.to_datetime(df['Date'],format ="%Y%m%d")
-        df.sort_values(['Date'],inplace=True)
-        df.set_index(['Date'], inplace=True, drop=True)
-        #transfer column which contains char to num
+        if method == 'monthly':
+            df = self.get_data_monthly()
+        #  column which contains char to num
         degree = df['quant_grade'].value_counts().index.values
         degree.sort()
 
@@ -209,9 +215,11 @@ class context(object):
             df.loc[df['quant_grade']==grade,'quant_grade'] = s
             s+=1
 
-        self.features = df.loc[:,['Date','tic']+self.variable_list]
+        self.features = df.loc[:,['tic']+self.variable_list]
+        self.features.dropna(inplace=True)
         self.features.to_csv('feature.csv')
         print('import features completed!')
+
 
     def book(self,df,weights,weight_new_temp=None,stats_summary = None,rebalance_flag = False):
 
@@ -258,7 +266,7 @@ class context(object):
 
         if len(self.weight_new)>0:
             df = record_return(df, self.s, self.reb_index, self.weight_new, \
-                                   self.leverage, self.trading_days,self.interest_rate,daily=True)
+                                   self.leverage, self.trading_days,self.interest_rate,)
             weights = record_weights(df, self.s, weights)
 
         return df,weights,rebalance_flag
@@ -280,7 +288,7 @@ class context(object):
 
         # ===== Deal with Y: future returns
         returns = (p_data.shift(-horizon) - p_data) / p_data
-        if relative:
+        if relative & (ben is not None):
             ben = returns[ben]
             returns = pd.DataFrame(np.subtract(np.array(returns),
                                                np.array(ben).reshape(len(ben), 1)),
@@ -448,7 +456,7 @@ class context(object):
                             test_y,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
                                                         self.context_dict,cur_date, remove, bottom_thre,top_thre)
-            df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag)
+            df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag,)
             self.s += 1
 
         if np.shape(df[df['rebalancing']==1])[0]>1:
