@@ -11,8 +11,10 @@ res_path = os.path.join(path+ '\\res\\')
 
 def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1):
     # columns needed
+    if ben == None:
+        ben = str(ben)
     col = [ben, 'nav', 'rebalancing','summary_score', 'stoploss', 'Interest_rate']
-    # df = self.book
+
     df_valid = df.loc[:, col]
     start_balance = df.index[df['rebalancing'] == 1][0]
     df_valid = df_valid[pd.to_datetime(df_valid.index) >= \
@@ -24,7 +26,6 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
     df_valid['return'] = (df['nav'] - df['nav'].shift(1))/ df['nav'].shift(1)
     # benchmark_net_value
     df_valid[ben] = df_valid[ben] / df_valid[ben].iloc[0]
-    # df_valid['hs300'] = df_valid['hs300'] / df_valid['hs300'].iloc[0]
 
     # benchmark_return
     df_valid[ben+'_return'] = (df_valid[ben] -
@@ -175,7 +176,7 @@ class context(object):
         return df
 
     def __init__(self,start_day,leverage,long_position,short_position,interest_rate,\
-                 trading_days,f_list,end_day=-1,method='monthly'):
+                 trading_days,f_list,freq,daily =False,end_day=-1,method='monthly'):
 
         headers = pd.read_csv(ana_path+'headers_analytics.csv')
         self.feature_name = headers.columns.values[2:]
@@ -188,6 +189,9 @@ class context(object):
         self.trading_days = trading_days
         self.variable_list = f_list
         self.interest_rate = interest_rate
+        self.freq = freq
+        self.daily = daily
+
         # import close data
         self.context_dict = dict()
         for i in self.trading_data_list:
@@ -198,7 +202,10 @@ class context(object):
             try:
                 temp['Date'] = pd.to_datetime(temp['Date'],format ='%m/%d/%Y')
             except:
-                temp['Date'] = pd.to_datetime(temp['Date'], format='%Y-%m-%d')
+                try:
+                    temp['Date'] = pd.to_datetime(temp['Date'], format='%Y-%m-%d')
+                except:
+                    temp['Date'] = pd.to_datetime(temp['Date'], format='%Y%m%d')
             temp.sort_values(['Date'], inplace=True)
             temp.set_index(['Date'], drop=True, inplace=True)
             self.context_dict[i] = temp
@@ -266,7 +273,7 @@ class context(object):
 
         if len(self.weight_new)>0:
             df = record_return(df, self.s, self.reb_index, self.weight_new, \
-                                   self.leverage, self.trading_days,self.interest_rate,)
+                                   self.leverage, self.trading_days,self.interest_rate,self.daily)
             weights = record_weights(df, self.s, weights)
 
         return df,weights,rebalance_flag
@@ -310,12 +317,12 @@ class context(object):
         # Deal with Xs: normalize in all stocks each quarter
         if normalize:
             for time in f_calendar.values:
-
-                temp = fd_data.loc[time, self.variable_list]
-                # print(temp.shape)
-                if len(temp.shape)>1:
-                    fd_data.loc[time, self.variable_list] \
-                        = np.apply_along_axis(normalized, 0, np.array(temp))
+                if time in fd_data.index:
+                    temp = fd_data.loc[time, self.variable_list]
+                    # print(temp.shape)
+                    if not isinstance(temp,pd.Series):
+                        fd_data.loc[time, self.variable_list] \
+                            = np.apply_along_axis(normalized, 0, np.array(temp))
 
         def append_y(x, re_st,):
             dateindex = pd.to_datetime(re_st.index, infer_datetime_format=True)
@@ -404,20 +411,24 @@ class context(object):
                     #                                 test_temp.loc[test_date,:]],axis=1)
                     #         s += 1
                     # x_test = x_test.T
-                    x_test = train_all.loc[f_calendar[-1],:][np.isin(train_all.loc[f_calendar[-1],'tic'],symbols)]
-                    # s = np.shape(x_test)[0]
-                    # print(s,'stocks completed in x_test')
-
-                    if len(np.shape(x_test))>1: #no series
-                        x_test.set_index(['tic'], drop=True,inplace = True)# need know data belongs to whom
-                        x_test.drop(['y'],axis = 1,inplace =True)
-                        x_test.dropna(how='any', axis=0,inplace=True)
+                    ## generate x_test
+                    if f_calendar[-1] in train_all.index:  # some stocks may not be traded as this moment.
+                        temp = train_all.loc[f_calendar[-1], :]
+                        if isinstance(temp, pd.Series):
+                            temp = temp.to_frame().T
+                        x_test = temp[np.isin(temp['tic'], symbols)]
+                        # s = np.shape(x_test)[0]
+                        # print(s,'stocks completed in x_test')
+                        x_test.set_index(['tic'], drop=True, inplace=True)  # need know data belongs to whom
+                        x_test.drop(['y'], axis=1, inplace=True)
+                        x_test.dropna(how='any', axis=0, inplace=True)
                         self.x_test = x_test
 
                         bool = True
+
         return bool
 
-    def back_test(self,ben,horizon,freq,model_name,address,select_method,order_method,remove=[],\
+    def back_test(self,ben,horizon,model_name,address,select_method,order_method,remove=[],\
                   top_per = 0,bottom_per=20,bottom_thre=1.0,top_thre=0.0,roll=-1,):
         # initial setting
         df = self.context_dict['close'].copy()
@@ -449,19 +460,22 @@ class context(object):
             cur_date = pd.to_datetime(cur_date)
             # rebalance in a fixed frequency in freq rate
             if self.s>0:# begin to rebalance at least after the second recordings
-                if np.mod(self.s, freq) == 0:
+                if np.mod(self.s, self.freq) == 0:
 
                     if self.extract_train(cur_date,horizon,select_method,top_per,bottom_per,roll=roll,):
                         if np.shape(self.x_test)[0]>0:
                             test_y,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
                                                         self.context_dict,cur_date, remove, bottom_thre,top_thre)
-            df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag,)
+            df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag)
             self.s += 1
 
         if np.shape(df[df['rebalancing']==1])[0]>1:
             compute_indicators(df, ben,res_path+'perf_'+address,self.trading_days)
             weights.to_csv(res_path+'weights_' + address)
+        else:
+            print('no rebalance, no performnace.')
+
         print('back_test completed!')
 
     # def test_eps_surprise(self,address,select_method,top_per,bottom_per,thre=0.05):
