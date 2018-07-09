@@ -23,9 +23,10 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
         test_y = pd.Series(lasso.predict(test_x), index=test_x.index)
         summary = lasso.score(train_x,train_y)
     if model_name == 'Ridge':
-        model = sklearn.linear_model.Ridge(50)
+        model = sklearn.linear_model.Ridge(1.0,fit_intercept = False)
         ridge = model.fit(train_x, train_y)
         test_y = pd.Series(ridge.predict(test_x), index=test_x.index)
+        summary = lasso.score(train_x, train_y)
     if model_name == 'SVR':
         svr_rbf = SVR(kernel='rbf', C=1, gamma=0.0001, epsilon=0.1)
         svr_rbf.fit(train_x, train_y)
