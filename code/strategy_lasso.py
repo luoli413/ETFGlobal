@@ -87,7 +87,7 @@ if __name__ == "__main__":
                      'quant_sentiment_si','quant_fundamental_pe','quant_fundamental_div','quant_global_sector',\
                      'quant_global_country','quant_quality_liquidity','quant_quality_firm',]
 
-    long_position = 1.3
+    long_position = 1.5
     short_position = -0.5
     leverage = 1.0
     # end_day = -1 # -1 means till today
@@ -100,17 +100,18 @@ if __name__ == "__main__":
     ben = 'ACWI' # benchmark
     model_name = 'Lasso'
     relative = True
-    bottom_thre = 0.1  # top10%
+    bottom_thre = 0.2  # top10%
     top_thre = 0.0
 
     # Back-test initialization
-    context = context(start_day,leverage,long_position,short_position,interest_rate,trading_days,variable_list,)
+    context = context(start_day, leverage, long_position, short_position, \
+                      interest_rate, trading_days, variable_list, freq)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
     # context.generate_train(horizon, relative, ben, normalize=True)
     # Name the results using parameters and so on
     address = 'etf_T_0.001_long'+str(round(long_position,1))+'_'+ 'short'+str(round(short_position,1))+\
-              '_' + model_name +'_'+str(top_thre)+'_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'_daily.csv'
-    context.back_test(ben, horizon, freq, model_name, address, select_stocks, order_method,\
+              '_' + model_name +'_'+str(top_thre)+'_'+str(bottom_thre)+'_'+str(horizon)+'_'+str(roll)+'.csv'
+    context.back_test(ben, horizon, model_name, address, select_stocks, order_method,\
                       bottom_thre=bottom_thre,top_thre = top_thre,roll=roll)
 
