@@ -10,12 +10,15 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/code$strategy_ridge.coverage" NAME="strategy_ridge Coverage Results" MODIFIED="1531193691243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$strategy_demo.coverage" NAME="strategy_demo Coverage Results" MODIFIED="1529920161680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$summary_inds.coverage" NAME="summary_inds Coverage Results" MODIFIED="1530778371778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$test.coverage" NAME="test Coverage Results" MODIFIED="1527846431245" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$env_context.coverage" NAME="env_context Coverage Results" MODIFIED="1528888092443" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/code$strategy_randomforest.coverage" NAME="strategy_randomforest Coverage Results" MODIFIED="1531276240858" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/code$strategy_svr.coverage" NAME="strategy_svr Coverage Results" MODIFIED="1531275924741" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$strategy_herding.coverage" NAME="strategy_herding Coverage Results" MODIFIED="1528886889459" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/code$strategy_lasso.coverage" NAME="strategy_lasso Coverage Results" MODIFIED="1531057125791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/code$strategy_lasso.coverage" NAME="strategy_lasso Coverage Results" MODIFIED="1531188633784" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$download_data.coverage" NAME="download_data Coverage Results" MODIFIED="1530629192940" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/code$ftp_download.coverage" NAME="ftp_download Coverage Results" MODIFIED="1528806037642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
@@ -24,77 +27,53 @@
       <file leaf-file-name="env_context.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/env_context.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1426">
-              <caret line="221" column="0" lean-forward="false" selection-start-line="221" selection-start-column="0" selection-end-line="221" selection-end-column="0" />
+            <state relative-caret-position="169">
+              <caret line="382" column="0" lean-forward="true" selection-start-line="382" selection-start-column="0" selection-end-line="382" selection-end-column="0" />
               <folding>
                 <element signature="e#24#42#0" expanded="true" />
-                <element signature="e#352#5675#0" expanded="false" />
-                <element signature="e#1090#1157#0" expanded="false" />
-                <element signature="e#1849#1884#0" expanded="false" />
-                <element signature="e#2516#2671#0" expanded="false" />
-                <element signature="e#3914#5565#0" expanded="false" />
-                <element signature="e#3972#4388#0" expanded="false" />
-                <element signature="e#4208#4216#0" expanded="false" />
-                <element signature="e#4521#4545#0" expanded="false" />
-                <element signature="e#4660#4952#0" expanded="false" />
-                <element signature="e#5003#5246#0" expanded="false" />
-                <element signature="e#5741#7257#0" expanded="false" />
-                <element signature="e#9277#9838#0" expanded="false" />
-                <element signature="e#9960#10580#0" expanded="false" />
-                <element signature="e#11729#14944#0" expanded="false" />
-                <element signature="e#15097#18133#0" expanded="false" />
-                <element signature="e#20543#20624#0" expanded="false" />
-                <element signature="e#23227#26297#0" expanded="false" />
-                <element signature="e#23532#23589#0" expanded="false" />
-                <element signature="e#24465#24554#0" expanded="false" />
-                <element signature="e#25661#25700#0" expanded="false" />
+                <element signature="e#352#5626#0" expanded="false" />
+                <element signature="e#1800#1835#0" expanded="false" />
+                <element signature="e#2467#2622#0" expanded="false" />
+                <element signature="e#3865#5516#0" expanded="false" />
+                <element signature="e#3923#4339#0" expanded="false" />
+                <element signature="e#4159#4167#0" expanded="false" />
+                <element signature="e#4472#4496#0" expanded="false" />
+                <element signature="e#4611#4903#0" expanded="false" />
+                <element signature="e#4954#5197#0" expanded="false" />
+                <element signature="e#5692#7208#0" expanded="false" />
+                <element signature="e#9381#11811#0" expanded="false" />
+                <element signature="e#9429#9990#0" expanded="false" />
+                <element signature="e#10112#10732#0" expanded="false" />
+                <element signature="e#11891#15180#0" expanded="false" />
+                <element signature="e#18779#21061#0" expanded="false" />
+                <element signature="e#21067#21148#0" expanded="false" />
+                <element signature="e#23751#26821#0" expanded="false" />
+                <element signature="e#24056#24113#0" expanded="false" />
+                <element signature="e#24989#25078#0" expanded="false" />
+                <element signature="e#26185#26224#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ftp_download.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ftp_download.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ftp_download.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-82">
-              <caret line="23" column="30" lean-forward="false" selection-start-line="23" selection-start-column="30" selection-end-line="23" selection-end-column="30" />
+            <state relative-caret-position="462">
+              <caret line="96" column="37" lean-forward="false" selection-start-line="96" selection-start-column="37" selection-end-line="96" selection-end-column="37" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="strategy_lasso.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strategy_lasso.py">
+      <file leaf-file-name="strategy_randomforest.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/strategy_randomforest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="863">
-              <caret line="68" column="46" lean-forward="false" selection-start-line="68" selection-start-column="46" selection-end-line="68" selection-end-column="46" />
+            <state relative-caret-position="228">
+              <caret line="108" column="13" lean-forward="true" selection-start-line="108" selection-start-column="13" selection-end-line="108" selection-end-column="13" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
-                <element signature="e#407#1096#0" expanded="false" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="strategy.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strategy.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="12" column="21" lean-forward="false" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
-              <folding>
-                <element signature="e#0#19#0" expanded="true" />
-                <element signature="e#3865#4449#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="strategy_demo.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strategy_demo.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-17">
-              <caret line="88" column="24" lean-forward="false" selection-start-line="88" selection-start-column="24" selection-end-line="88" selection-end-column="24" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -102,8 +81,8 @@
       <file leaf-file-name="strategy_ridge.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strategy_ridge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="305">
-              <caret line="89" column="18" lean-forward="false" selection-start-line="89" selection-start-column="18" selection-end-line="89" selection-end-column="18" />
+            <state relative-caret-position="204">
+              <caret line="109" column="4" lean-forward="true" selection-start-line="109" selection-start-column="4" selection-end-line="110" selection-end-column="76" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -140,11 +119,13 @@
         <option value="$PROJECT_DIR$/strategy_demo.py" />
         <option value="$PROJECT_DIR$/ftp_download.py" />
         <option value="$PROJECT_DIR$/utils.py" />
-        <option value="$PROJECT_DIR$/strategy_ridge.py" />
         <option value="$PROJECT_DIR$/summary_inds.py" />
+        <option value="$PROJECT_DIR$/env_context.py" />
         <option value="$PROJECT_DIR$/strategy.py" />
         <option value="$PROJECT_DIR$/strategy_lasso.py" />
-        <option value="$PROJECT_DIR$/env_context.py" />
+        <option value="$PROJECT_DIR$/strategy_ridge.py" />
+        <option value="$PROJECT_DIR$/strategy_svr.py" />
+        <option value="$PROJECT_DIR$/strategy_randomforest.py" />
       </list>
     </option>
   </component>
@@ -191,6 +172,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -207,16 +190,14 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../RT/work/fin_code" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../code_merge/strategy.py" />
     <property name="settings.editor.splitter.proportion" value="0.29460582" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/../../../RT/work/fin_code/env_context.py" />
+    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/../code_merge/strategy.py" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -230,61 +211,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.strategy_lasso">
-    <configuration name="download_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="code" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="env_context" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="code" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/env_context.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="strategy_demo" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="code" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/strategy_demo.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
+  <component name="RunManager" selected="Python.strategy_randomforest">
     <configuration name="strategy_lasso" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -299,6 +226,60 @@
       <module name="code" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/strategy_lasso.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="strategy_randomforest" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="code" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/strategy_randomforest.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="strategy_ridge" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="code" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/strategy_ridge.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="strategy_svr" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="code" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/strategy_svr.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -322,19 +303,19 @@
       <option name="EMULATE_TERMINAL" value="false" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.strategy_demo" />
-      <item index="1" class="java.lang.String" itemvalue="Python.env_context" />
-      <item index="2" class="java.lang.String" itemvalue="Python.download_data" />
-      <item index="3" class="java.lang.String" itemvalue="Python.summary_inds" />
-      <item index="4" class="java.lang.String" itemvalue="Python.strategy_lasso" />
+      <item index="0" class="java.lang.String" itemvalue="Python.summary_inds" />
+      <item index="1" class="java.lang.String" itemvalue="Python.strategy_lasso" />
+      <item index="2" class="java.lang.String" itemvalue="Python.strategy_ridge" />
+      <item index="3" class="java.lang.String" itemvalue="Python.strategy_svr" />
+      <item index="4" class="java.lang.String" itemvalue="Python.strategy_randomforest" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.strategy_lasso" />
-        <item index="1" class="java.lang.String" itemvalue="Python.summary_inds" />
-        <item index="2" class="java.lang.String" itemvalue="Python.download_data" />
-        <item index="3" class="java.lang.String" itemvalue="Python.strategy_demo" />
-        <item index="4" class="java.lang.String" itemvalue="Python.env_context" />
+        <item index="0" class="java.lang.String" itemvalue="Python.strategy_randomforest" />
+        <item index="1" class="java.lang.String" itemvalue="Python.strategy_svr" />
+        <item index="2" class="java.lang.String" itemvalue="Python.strategy_ridge" />
+        <item index="3" class="java.lang.String" itemvalue="Python.strategy_lasso" />
+        <item index="4" class="java.lang.String" itemvalue="Python.summary_inds" />
       </list>
     </recent_temporary>
   </component>
@@ -353,15 +334,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17237687" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17665952" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30199766" sideWeight="0.50214136" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25381905" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21856639" sideWeight="0.49785867" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.70622796" sideWeight="0.49785867" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -405,6 +385,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/env_context.py</url>
+          <line>385</line>
+          <option name="timeStamp" value="99" />
+        </line-breakpoint>
+      </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
@@ -415,19 +402,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="97" />
+      <option name="time" value="100" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/data_clean.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2070">
-          <caret line="94" column="23" lean-forward="true" selection-start-line="94" selection-start-column="23" selection-end-line="94" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils.py" />
     <entry file="file://$PROJECT_DIR$/ftp_download.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="115">
@@ -462,26 +441,26 @@
           <caret line="156" column="23" lean-forward="true" selection-start-line="156" selection-start-column="23" selection-end-line="156" selection-end-column="23" />
           <folding>
             <element signature="e#24#42#0" expanded="true" />
-            <element signature="e#352#5675#0" expanded="false" />
-            <element signature="e#1090#1157#0" expanded="false" />
-            <element signature="e#1849#1884#0" expanded="false" />
-            <element signature="e#2516#2671#0" expanded="false" />
-            <element signature="e#3914#5565#0" expanded="false" />
-            <element signature="e#3972#4388#0" expanded="false" />
-            <element signature="e#4208#4216#0" expanded="false" />
-            <element signature="e#4521#4545#0" expanded="false" />
-            <element signature="e#4660#4952#0" expanded="false" />
-            <element signature="e#5003#5246#0" expanded="false" />
-            <element signature="e#5741#7257#0" expanded="false" />
-            <element signature="e#9277#9838#0" expanded="false" />
-            <element signature="e#9960#10580#0" expanded="false" />
-            <element signature="e#11729#14944#0" expanded="false" />
-            <element signature="e#15097#18133#0" expanded="false" />
-            <element signature="e#20543#20624#0" expanded="false" />
-            <element signature="e#23227#26297#0" expanded="false" />
-            <element signature="e#23532#23589#0" expanded="false" />
-            <element signature="e#24465#24554#0" expanded="false" />
-            <element signature="e#25661#25700#0" expanded="false" />
+            <element signature="e#352#5626#0" expanded="false" />
+            <element signature="e#1800#1835#0" expanded="false" />
+            <element signature="e#2467#2622#0" expanded="false" />
+            <element signature="e#3865#5516#0" expanded="false" />
+            <element signature="e#3923#4339#0" expanded="false" />
+            <element signature="e#4159#4167#0" expanded="false" />
+            <element signature="e#4472#4496#0" expanded="false" />
+            <element signature="e#4611#4903#0" expanded="false" />
+            <element signature="e#4954#5197#0" expanded="false" />
+            <element signature="e#5692#7208#0" expanded="false" />
+            <element signature="e#9381#11811#0" expanded="false" />
+            <element signature="e#9429#9990#0" expanded="false" />
+            <element signature="e#10112#10732#0" expanded="false" />
+            <element signature="e#11891#15180#0" expanded="false" />
+            <element signature="e#18779#21061#0" expanded="false" />
+            <element signature="e#21067#21148#0" expanded="false" />
+            <element signature="e#23751#26821#0" expanded="false" />
+            <element signature="e#24056#24113#0" expanded="false" />
+            <element signature="e#24989#25078#0" expanded="false" />
+            <element signature="e#26185#26224#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -686,10 +665,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
           <caret line="19" column="46" lean-forward="false" selection-start-line="19" selection-start-column="46" selection-end-line="19" selection-end-column="46" />
-          <folding>
-            <element signature="e#1136#1923#0" expanded="false" />
-            <element signature="e#2061#2774#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -697,7 +672,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="138">
           <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -705,25 +679,31 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strategy_demo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23">
+          <caret line="88" column="24" lean-forward="false" selection-start-line="88" selection-start-column="24" selection-end-line="88" selection-end-column="24" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strategy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="12" column="21" lean-forward="false" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
+        <state relative-caret-position="828">
+          <caret line="36" column="50" lean-forward="true" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="50" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <element signature="e#3865#4449#0" expanded="false" />
+            <element signature="e#4267#4851#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/strategy_lasso.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="863">
-          <caret line="68" column="46" lean-forward="false" selection-start-line="68" selection-start-column="46" selection-end-line="68" selection-end-column="46" />
+        <state relative-caret-position="636">
+          <caret line="116" column="0" lean-forward="true" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
             <element signature="e#407#1096#0" expanded="false" />
@@ -731,59 +711,71 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strategy_demo.py">
+    <entry file="file://$PROJECT_DIR$/env_context.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-17">
-          <caret line="88" column="24" lean-forward="false" selection-start-line="88" selection-start-column="24" selection-end-line="88" selection-end-column="24" />
-          <folding />
+        <state relative-caret-position="169">
+          <caret line="382" column="0" lean-forward="true" selection-start-line="382" selection-start-column="0" selection-end-line="382" selection-end-column="0" />
+          <folding>
+            <element signature="e#24#42#0" expanded="true" />
+            <element signature="e#352#5626#0" expanded="false" />
+            <element signature="e#1800#1835#0" expanded="false" />
+            <element signature="e#2467#2622#0" expanded="false" />
+            <element signature="e#3865#5516#0" expanded="false" />
+            <element signature="e#3923#4339#0" expanded="false" />
+            <element signature="e#4159#4167#0" expanded="false" />
+            <element signature="e#4472#4496#0" expanded="false" />
+            <element signature="e#4611#4903#0" expanded="false" />
+            <element signature="e#4954#5197#0" expanded="false" />
+            <element signature="e#5692#7208#0" expanded="false" />
+            <element signature="e#9381#11811#0" expanded="false" />
+            <element signature="e#9429#9990#0" expanded="false" />
+            <element signature="e#10112#10732#0" expanded="false" />
+            <element signature="e#11891#15180#0" expanded="false" />
+            <element signature="e#18779#21061#0" expanded="false" />
+            <element signature="e#21067#21148#0" expanded="false" />
+            <element signature="e#23751#26821#0" expanded="false" />
+            <element signature="e#24056#24113#0" expanded="false" />
+            <element signature="e#24989#25078#0" expanded="false" />
+            <element signature="e#26185#26224#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/strategy_ridge.py">
+    <entry file="file://$PROJECT_DIR$/strategy_svr.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="305">
-          <caret line="89" column="18" lean-forward="false" selection-start-line="89" selection-start-column="18" selection-end-line="89" selection-end-column="18" />
+        <state relative-caret-position="25">
+          <caret line="104" column="18" lean-forward="true" selection-start-line="104" selection-start-column="18" selection-end-line="104" selection-end-column="18" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/env_context.py">
+    <entry file="file://$PROJECT_DIR$/ftp_download.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1426">
-          <caret line="221" column="0" lean-forward="false" selection-start-line="221" selection-start-column="0" selection-end-line="221" selection-end-column="0" />
+        <state relative-caret-position="462">
+          <caret line="96" column="37" lean-forward="false" selection-start-line="96" selection-start-column="37" selection-end-line="96" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/strategy_ridge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="109" column="4" lean-forward="true" selection-start-line="109" selection-start-column="4" selection-end-line="110" selection-end-column="76" />
           <folding>
-            <element signature="e#24#42#0" expanded="true" />
-            <element signature="e#352#5675#0" expanded="false" />
-            <element signature="e#1090#1157#0" expanded="false" />
-            <element signature="e#1849#1884#0" expanded="false" />
-            <element signature="e#2516#2671#0" expanded="false" />
-            <element signature="e#3914#5565#0" expanded="false" />
-            <element signature="e#3972#4388#0" expanded="false" />
-            <element signature="e#4208#4216#0" expanded="false" />
-            <element signature="e#4521#4545#0" expanded="false" />
-            <element signature="e#4660#4952#0" expanded="false" />
-            <element signature="e#5003#5246#0" expanded="false" />
-            <element signature="e#5741#7257#0" expanded="false" />
-            <element signature="e#9277#9838#0" expanded="false" />
-            <element signature="e#9960#10580#0" expanded="false" />
-            <element signature="e#11729#14944#0" expanded="false" />
-            <element signature="e#15097#18133#0" expanded="false" />
-            <element signature="e#20543#20624#0" expanded="false" />
-            <element signature="e#23227#26297#0" expanded="false" />
-            <element signature="e#23532#23589#0" expanded="false" />
-            <element signature="e#24465#24554#0" expanded="false" />
-            <element signature="e#25661#25700#0" expanded="false" />
+            <element signature="e#0#30#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ftp_download.py">
+    <entry file="file://$PROJECT_DIR$/strategy_randomforest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-82">
-          <caret line="23" column="30" lean-forward="false" selection-start-line="23" selection-start-column="30" selection-end-line="23" selection-end-column="30" />
-          <folding />
+        <state relative-caret-position="228">
+          <caret line="108" column="13" lean-forward="true" selection-start-line="108" selection-start-column="13" selection-end-line="108" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#30#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

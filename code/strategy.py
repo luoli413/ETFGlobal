@@ -26,7 +26,7 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
         model = sklearn.linear_model.Ridge(1.0,fit_intercept = False)
         ridge = model.fit(train_x, train_y)
         test_y = pd.Series(ridge.predict(test_x), index=test_x.index)
-        summary = lasso.score(train_x, train_y)
+        summary = ridge.score(train_x, train_y)
     if model_name == 'SVR':
         svr_rbf = SVR(kernel='rbf', C=1, gamma=0.0001, epsilon=0.1)
         svr_rbf.fit(train_x, train_y)
@@ -71,6 +71,13 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
         model = AdaBoostRegressor(n_estimators=100,learning_rate = 0.1)
         adaboost = model.fit(train_x,train_y)
         test_y = pd.Series(adaboost.predict(test_x),index = test_x.index)
+
+    if model_name == 'RandomForestRegressor':
+        from sklearn.ensemble import RandomForestRegressor
+        rfr = RandomForestRegressor(n_estimators=100, criterion='mse',max_features='auto')
+        rfr.fit(train_x, train_y)
+        y_pred_rfr = rfr.predict(test_x)
+        test_y = pd.Series(y_pred_rfr, index=test_x.index)
 
     return test_y,summary
 
