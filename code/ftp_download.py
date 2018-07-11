@@ -25,23 +25,40 @@ def download_data(today):
             file_list.append(word[-1])
     # #create the directory to save the downloading file
     if os.path.isdir("analytics"):
-        pass
+        exist_list = os.listdir("analytics\\")
+        exist_list.sort()
+        if len(exist_list)>=2:
+            latest_file = exist_list[-2]
+            head_loc = latest_file.find('_')+1
+            tail_loc = latest_file.find('.')
+            latest_date = latest_file[head_loc:tail_loc]
+
     else:
         os.mkdir("analytics")
 
     # # download all file to certain directory
     for file in file_list:
         url = web + '/'+file
-        # loc_file = "analytics/" + file
+
         if file[0]!='a':
             loc_a = file.find('a')
             textstr = file[loc_a:file.find('.')]
             datestr = file[:loc_a-1]
-            file = textstr+'_'+\
-                   datetime.datetime.strptime(datestr,'%Y-%m-%d').strftime(format = '%Y%m%d')+'.csv'
+            datestr = datetime.datetime.strptime(datestr,'%Y-%m-%d').strftime(format = '%Y%m%d')
+        else:
+            head_loc = file.find('_') + 1
+            tail_loc = file.find('.')
+            datestr = file[head_loc:tail_loc]
+
+        if datestr<=latest_date:
+            continue
+        else:
+            if file[0]!='a':
+                file = textstr+'_'+datestr+'.csv'
+
         loc_file = "analytics/" + file
         urllib.request.urlretrieve(url, loc_file)
-        print('.', end='', flush=True)
+        print(file,end=',',flush=True)
     print('\n'+'ftp downloading completed')
 
     yf.pdr_override()
