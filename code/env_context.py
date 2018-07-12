@@ -357,8 +357,7 @@ class context(object):
         print(train.shape)
         print('generating train completed!')
 
-    def extract_train(self,cur_date,horizon,select_method, top_per,bottom_per,\
-                      roll=-1,istech =1,large=True,top=True):
+    def extract_train(self,cur_date,horizon,select_method,roll=-1,*args,**kwargs):
 
         v_list = ['tic', 'y'] + self.variable_list
         # train = self.train[v_list].copy()
@@ -383,7 +382,7 @@ class context(object):
 
             if len(f_calendar)>=2:
 
-                symbols = select_method(self.context_dict, f_calendar, top_per,bottom_per)
+                symbols = select_method(self.context_dict, f_calendar, *args,**kwargs)
                 train_all = train[np.isin(train['tic'], symbols)]
                 # print(train_all.index.drop_duplicates())
                 train_calendar = f_calendar[(pd.to_datetime(f_calendar) -\
@@ -428,8 +427,7 @@ class context(object):
 
         return bool
 
-    def back_test(self,ben,horizon,model_name,address,select_method,order_method,remove=[],\
-                  top_per = 0,bottom_per=20,bottom_thre=1.0,top_thre=0.0,roll=-1,):
+    def back_test(self,ben,horizon,model_name,address,select_method,order_method,roll=-1,*args,**kwargs):
         # initial setting
         df = self.context_dict['close'].copy()
         symbols = self.context_dict['close'].columns[:]
@@ -462,11 +460,11 @@ class context(object):
             if self.s>0:# begin to rebalance at least after the second recordings
                 if np.mod(self.s, self.freq) == 0:
 
-                    if self.extract_train(cur_date,horizon,select_method,top_per,bottom_per,roll=roll,):
+                    if self.extract_train(cur_date,horizon,select_method,roll=roll,*args,**kwargs):
                         if np.shape(self.x_test)[0]>0:
                             test_y,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
-                                                        self.context_dict,cur_date, remove, bottom_thre,top_thre)
+                                                        self.context_dict,cur_date,*args,**kwargs)
             df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag)
             self.s += 1
 
@@ -525,8 +523,7 @@ class context(object):
     #         temp,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
     #     return summary
 
-    def integrate_summary(self,horizon,freq,model_name,select_method, \
-                      top_per=0, bottom_per=20, bottom_thre=1.0, top_thre=0.0, roll=-1,):
+    def integrate_summary(self,horizon,freq,model_name,select_method,roll=-1):
 
         v_len = len(self.variable_list)
         integrate_summary = pd.DataFrame(np.zeros((v_len+4,2)),\
@@ -548,7 +545,7 @@ class context(object):
             if s > 0:  # begin to rebalance at least after the second recordings
                 if np.mod(s, freq) == 0:
 
-                    if self.extract_train(cur_date, horizon, select_method, top_per, bottom_per, roll=roll,):
+                    if self.extract_train(cur_date, horizon, select_method,roll=roll,):
                         if np.shape(self.x_test)[0] > 0:
                             test_y, summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
                             # weight_new_temp, flag = order_method(test_y, self.long_position, self.short_position, \
