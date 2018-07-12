@@ -6,23 +6,15 @@ import fix_yahoo_finance as yf
 import numpy as np
 import pandas as pd
 import datetime
+import warnings
 path = os.getcwd()
 data_path = os.path.join(path + '\\data\\')
 ana_path = os.path.join(path+'\\analytics\\')
+warnings.resetwarnings()  # Maybe somebody else is messing with the warnings system.
+warnings.filterwarnings('ignore')
 
-def download_data(today):
-    # download the dir of ftp file
-    web = "ftp://nyu_project:zkGUXJ6atHLH@ftp1.etfg.com/analytics"
-    urllib.request.urlretrieve(web,"list.txt")
-    # read dir to find the name of list of all data
-    f = open("list.txt","r")
-    n = f.read()
-    rows = n.split("\n")
-    file_list = []
-    for row in rows:
-        word = row.split(" ")
-        if ".csv" in word[-1]:
-            file_list.append(word[-1])
+def sort_file_list(original_list):
+    file_info = dict()
     # #create the directory to save the downloading file
     if os.path.isdir("analytics"):
         exist_list = os.listdir("analytics\\")
@@ -32,13 +24,10 @@ def download_data(today):
             head_loc = latest_file.find('_')+1
             tail_loc = latest_file.find('.')
             latest_date = latest_file[head_loc:tail_loc]
-
     else:
         os.mkdir("analytics")
 
-    # # download all file to certain directory
-    for file in file_list:
-        url = web + '/'+file
+    for file in original_list:
 
         if file[0]!='a':
             loc_a = file.find('a')
@@ -50,32 +39,57 @@ def download_data(today):
             tail_loc = file.find('.')
             datestr = file[head_loc:tail_loc]
 
-        if datestr<=latest_date:
+        if datestr<latest_date:
             continue
         else:
+            if datestr not in file_info.keys():
+                file_info[datestr]=[file]
             if file[0]!='a':
                 file = textstr+'_'+datestr+'.csv'
+            file_info[datestr].append(file)
 
-        loc_file = "analytics/" + file
+    return file_info
+
+def download_data(today):
+    # # download the dir of ftp file
+    web = "ftp://nyu_project:zkGUXJ6atHLH@ftp1.etfg.com/analytics"
+    # urllib.request.urlretrieve(web,"list.txt")
+    # read dir to find the name of list of all data
+    f = open("list.txt","r")
+    n = f.read()
+    rows = n.split("\n")
+    file_list = []
+    for row in rows:
+        word = row.split(" ")
+        if ".csv" in word[-1]:
+            file_list.append(word[-1])
+
+    file_info = sort_file_list(file_list)
+    # # # download all file to certain directory
+    for key in file_info.keys():
+        url = web + '/'+ file_info[key][0]
+        loc_file = "analytics/" + file_info[key][1]
         urllib.request.urlretrieve(url, loc_file)
-        print(file,end=',',flush=True)
+        print(loc_file,end=',',flush=True)
     print('\n'+'ftp downloading completed')
 
     yf.pdr_override()
-    #read etf ticks from the first file in order to cover the whole ETFs in the latest data
-    file = file_list[0]
-    if file[0]!='a':
-        loc_a = file.find('a')
-        textstr = file[loc_a:file.find('.')]
-        datestr = file[:loc_a-1]
-        file = textstr+'_'+\
-               datetime.datetime.strptime(datestr,'%Y-%m-%d').strftime(format = '%Y%m%d')+'.csv'
-
-    first_file = ana_path + file
+    #read the whole ETFs in the latest data
+    exist_list = os.listdir("analytics\\")
+    if len(exist_list)>0:
+        exist_list.sort(reverse=True)
+        first_file = ana_path + exist_list[1]
+    else:
+        print('analytics downloading failed!')
+        return
     f = pd.read_csv(first_file, header = None)
     col = f[1].values# fetch ticker names
-    close = pd.DataFrame()
-    volume = pd.DataFrame()
+    # first get trading_days
+    sp500 = pdr.get_data_yahoo('^GSPC',start='2012-02-01',end=today)
+    sp500_close = sp500['Adj Close']
+    close = pd.DataFrame(index=sp500_close.index)
+    volume = pd.DataFrame(index=sp500_close.index)
+
     for tick in col:
         try:
            data = pdr.get_data_yahoo(tick,start="2012-02-01", end=today)
@@ -83,11 +97,15 @@ def download_data(today):
            print(tick)
            print('?')
         if "Adj Close" in data:
-            close[tick] = data["Adj Close"]
+            temp = data["Adj Close"]
+            temp.name = tick
+            close = close.join(temp.to_frame(),how='left')
         else:
             close[tick] = np.nan
         if 'Volume' in data:
-            volume[tick] = data["Volume"]
+            temp = data['Volume']
+            temp.name = tick
+            volume = volume.join(temp,how='left')
         else:
             volume[tick] = np.nan
 
