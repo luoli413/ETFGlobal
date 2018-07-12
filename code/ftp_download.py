@@ -102,6 +102,7 @@ def download_data(today):
             close = close.join(temp.to_frame(),how='left')
         else:
             close[tick] = np.nan
+        print(close.shape)
         if 'Volume' in data:
             temp = data['Volume']
             temp.name = tick
@@ -122,7 +123,7 @@ def data_processing():
     ret = (close - close.shift(1)) / close.shift(1)
     close[ret.abs()>2] = np.nan
     close.dropna(how='all', axis=1, inplace=True)
-    close.ffill(axis =0,inplace = True)
+    close.fillna(axis =0,method ='ffill',inplace = True)
     close.to_csv(data_path+'close.csv')
 
     volume = pd.read_csv(data_path+'volume.csv')
