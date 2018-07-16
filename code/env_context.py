@@ -136,38 +136,37 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
 
 class context(object):
 
-    def get_data_monthly(self):
+    def get_data_monthly(self,method):
+
         df = pd.DataFrame()
         close_df = self.context_dict['close']
         close_df = close_df[close_df.index >= pd.to_datetime(self.start_day)]
         if self.end_day != -1:
             close_df = close_df[close_df.index <= pd.to_datetime(self.end_day)]
-        f_calendar = close_df.index.values
-        s = 0
-        previous_month = datetime.datetime.strptime(str(close_df.index[0])[:10], "%Y-%m-%d").month
-        for date in f_calendar:
-            date = datetime.datetime.strptime(str(date)[:10], "%Y-%m-%d")
-            this_month = date.month
-            if s == 0:
-                file = ana_path + 'analytics_' + date.strftime("%Y%m%d") + '.csv'
-            else:
-                if previous_month == this_month:
-                    previous_month = this_month
-                    s += 1
-                    continue
-                else:
-                    file = ana_path + 'analytics_' + date.strftime("%Y%m%d") + '.csv'
 
-            if os.path.isfile(file):
-                ana_df = pd.read_csv(file, header=None, )
-                if df.empty:
-                    df = ana_df
-                else:
-                    df = pd.concat([df, ana_df])
-            else:
-                continue
-            s += 1
-            previous_month = this_month
+        if method=='last_date_monthly':
+            f_calendar = pd.Series(close_df.index.values)
+
+            def date_transfer(x,unit='d'):
+                if unit=='d':
+                    x = datetime.datetime.strptime(str(x)[:10], "%Y-%m-%d")
+                if unit=='m':
+                    x = datetime.datetime.strptime(str(x)[:10], "%Y%m")
+                return x
+
+            date_df = pd.DataFrame(f_calendar.apply(date_transfer),columns=['Date'])
+            date_df['monthly_date'] = date_df['Date'].apply(lambda x: str(x)[:8])
+            f_calendar = date_df.groupby('monthly_date')['Date'].max()
+            for date in f_calendar.values:
+                file = ana_path + 'analytics_' + \
+                       datetime.datetime.strptime(str(date)[:10],'%Y-%m-%d').strftime("%Y%m%d") + '.csv'
+                if os.path.isfile(file):
+                    ana_df = pd.read_csv(file, header=None, )
+                    if df.empty:
+                        df = ana_df
+                    else:
+                        df = pd.concat([df, ana_df])
+
 
         df.columns = ['Date', 'tic'] + list(self.feature_name)
         df['Date'] = pd.to_datetime(df['Date'], format="%Y%m%d")
@@ -175,11 +174,12 @@ class context(object):
         df.set_index(['Date'], inplace=True, drop=True)
         return df
 
-    def __init__(self,start_day,leverage,long_position,short_position,interest_rate,\
+    def __init__(self,ben,start_day,leverage,long_position,short_position,interest_rate,\
                  trading_days,f_list,freq,daily =False,end_day=-1,method='monthly'):
 
         headers = pd.read_csv(ana_path+'headers_analytics.csv')
         self.feature_name = headers.columns.values[2:]
+        self.ben = ben
         self.start_day = start_day
         self.end_day = end_day
         self.trading_data_list = ['close','volume']
@@ -211,8 +211,7 @@ class context(object):
             self.context_dict[i] = temp
         print('import trading data completed!')
         # import features
-        if method == 'monthly':
-            df = self.get_data_monthly()
+        df = self.get_data_monthly(method)
         #  column which contains char to num
         degree = df['quant_grade'].value_counts().index.values
         degree.sort()
@@ -278,7 +277,7 @@ class context(object):
 
         return df,weights,rebalance_flag
 
-    def generate_train(self,horizon,relative,ben,normalize = False):
+    def generate_train(self,horizon,relative,normalize = False,*args,**kwargs):
 
         v_list = ['tic'] + self.variable_list
         fd_data = self.features[v_list].copy()
@@ -290,27 +289,36 @@ class context(object):
             fd_data = fd_data[pd.to_datetime(fd_data.index) <= end_day]
         f_calendar = fd_data.index.drop_duplicates()
         cols = p_data.columns
-        symbols = cols[cols!= ben].values
+        symbols = cols[cols!= self.ben].values
         fd_data = fd_data[np.isin(fd_data['tic'],symbols)]
 
         # ===== Deal with Y: future returns
         returns = (p_data.shift(-horizon) - p_data) / p_data
-        if relative & (ben is not None):
-            ben = returns[ben]
+        if relative & (self.ben is not None):
+            ben = returns[self.ben]
             returns = pd.DataFrame(np.subtract(np.array(returns),
                                                np.array(ben).reshape(len(ben), 1)),
                                    index=returns.index, columns=returns.columns)
 
-        def normalized(x):
+        def normalized(x,method = '3sigma'):
             x = pd.Series(x)
             clean_x = x[~x.isnull()]
             if len(clean_x) > 3:
-                miu = np.nanmedian(clean_x)
-                sigma = np.nanstd(clean_x)
-                if sigma > 0:
+                if method=='3sigma':
+                    miu = np.nanmedian(clean_x)
+                    sigma = np.nanstd(clean_x)
+                    if sigma > 0:
+                        x = (x - miu) / sigma
+                        x[(~x.isnull()) & (x > 3)] = 3
+                        x[(~x.isnull()) & (x < -3)] = -3
+                if method =='98%shrink':
+                    head = clean_x.quantile(0.99)
+                    tail = clean_x.quantile(0.01)
+                    x[x > head] = head
+                    x[x < tail] = tail
+                    sigma = np.nanstd(clean_x)
+                    miu = np.nanmean(clean_x)
                     x = (x - miu) / sigma
-                    x[(~x.isnull()) & (x > 3)] = 3
-                    x[(~x.isnull()) & (x < -3)] = -3
             # print(len(x))
             return x
 
@@ -322,7 +330,7 @@ class context(object):
                     # print(temp.shape)
                     if not isinstance(temp,pd.Series):
                         fd_data.loc[time, self.variable_list] \
-                            = np.apply_along_axis(normalized, 0, np.array(temp))
+                            = np.apply_along_axis(normalized, 0, np.array(temp),kwargs)
 
         def append_y(x, re_st,):
             dateindex = pd.to_datetime(re_st.index, infer_datetime_format=True)
@@ -427,11 +435,11 @@ class context(object):
 
         return bool
 
-    def back_test(self,ben,horizon,model_name,address,select_method,order_method,roll=-1,*args,**kwargs):
+    def back_test(self,horizon,model_name,address,select_method,order_method,roll=-1,*args,**kwargs):
         # initial setting
         df = self.context_dict['close'].copy()
         symbols = self.context_dict['close'].columns[:]
-        symbols = symbols[symbols!= ben]
+        symbols = symbols[symbols!= self.ben]
         stock_num = len(symbols)
         back_testing = df.index[pd.to_datetime(df.index) >= pd.to_datetime(self.start_day)]
         df = df.loc[back_testing.values, :]
@@ -469,7 +477,7 @@ class context(object):
             self.s += 1
 
         if np.shape(df[df['rebalancing']==1])[0]>1:
-            compute_indicators(df, ben,res_path+'perf_'+address,self.trading_days)
+            compute_indicators(df, self.ben,res_path+'perf_'+address,self.trading_days)
             weights.to_csv(res_path+'weights_' + address)
         else:
             print('no rebalance, no performnace.')
