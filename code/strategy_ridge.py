@@ -94,19 +94,20 @@ if __name__ == "__main__":
     ben = 'ACWI' # benchmark
     model_name = 'Ridge'
     relative = True
-
-    thre = {'long_thre':(0.0,0.1),'short_thre':(0.0,0.2)}
+    normalize =True
+    nor_method = '98%shrink'
+    thre = {'long_thre':(0.0,0.2),'short_thre':(0.0,0.2)}
     daily = False
-
+    get_data_method='last_date_monthly'
     # Back-test initialization
-    context = context(start_day, leverage, long_position, short_position, \
-                      interest_rate, trading_days, variable_list,freq,daily=daily)
+    context = context(ben,start_day, leverage, long_position, short_position, \
+                      interest_rate, trading_days, variable_list,freq,daily=daily,method=get_data_method)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
-    # context.generate_train(horizon, relative, ben, normalize=True)
+    context.generate_train(horizon, relative, normalize,method=nor_method)
     # Name the results using parameters and so on
-    address = 'test_T_1.0_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
+    address = 'etf_T_1.0_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
               '_' + model_name + '_' + str(thre['long_thre'][1]) + '_' +str(thre['short_thre'][1])+'_'+ \
-              str(horizon)+ '_' + str(roll) + '.csv'
-    context.back_test(ben, horizon, model_name, address, select_stocks, order_method,roll,thre=thre)
+              str(horizon)+ '_' + str(roll) + '_'+nor_method+'.csv'
+    context.back_test(horizon, model_name, address, select_stocks, order_method,roll,thre=thre)
 
