@@ -55,6 +55,7 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
                 final_feature.append(column_min)
             else:
                 break
+
         X = sm.add_constant(train_x.loc[:,final_feature])
         model = sm.OLS(train_y, X)
         res = model.fit()
@@ -63,8 +64,9 @@ def model(model_name, train_x, train_y, test_x,alpha = 0.1):
             summary['f_test'] = res.f_pvalue
         if ~np.isnan(res.rsquared_adj):
             summary['score'] = res.rsquared_adj
-        xx = sm.add_constant(test_x.loc[:,final_feature])
+        xx = sm.add_constant(test_x.loc[:,final_feature],has_constant='raise')
         test_y = res.predict(xx)
+
 
     if model_name == 'AdaBoost':
         from sklearn.ensemble import  AdaBoostRegressor
