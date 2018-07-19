@@ -102,8 +102,8 @@ if __name__ == "__main__":
     daily = False
     get_data_method = 'last_date_monthly'
     # Back-test initialization
-    context = context(ben, start_day, leverage, long_position, short_position, \
-                      interest_rate, trading_days, variable_list, freq, daily=daily, method=get_data_method)
+    context = context(ben, start_day,variable_list,freq,leverage, long_position, short_position, \
+                      interest_rate, trading_days, daily=daily, method=get_data_method)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
     context.generate_train(horizon, relative, normalize, method=nor_method)
