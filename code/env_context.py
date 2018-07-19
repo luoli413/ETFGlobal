@@ -174,8 +174,8 @@ class context(object):
         df.set_index(['Date'], inplace=True, drop=True)
         return df
 
-    def __init__(self,ben,start_day,leverage,long_position,short_position,interest_rate,\
-                 trading_days,f_list,freq,daily =False,end_day=-1,method='monthly'):
+    def __init__(self,ben,start_day,f_list,freq=1,leverage=1.0,long_position=1.0,short_position=-1.0,\
+                 interest_rate=0.0,trading_days=252.0,daily =False,end_day=-1,method='last_date_monthly'):
 
         headers = pd.read_csv(ana_path+'headers_analytics.csv')
         self.feature_name = headers.columns.values[2:]
@@ -222,7 +222,7 @@ class context(object):
             s+=1
 
         self.features = df.loc[:,['tic']+self.variable_list]
-        self.features.dropna(inplace=True)
+        # self.features.dropna(inplace=True)
         self.features.to_csv('feature.csv')
         print('import features completed!')
 
@@ -311,6 +311,7 @@ class context(object):
                         x = (x - miu) / sigma
                         x[(~x.isnull()) & (x > 3)] = 3
                         x[(~x.isnull()) & (x < -3)] = -3
+
                 if method =='98%shrink':
                     head = clean_x.quantile(0.99)
                     tail = clean_x.quantile(0.01)
@@ -330,7 +331,7 @@ class context(object):
                     # print(temp.shape)
                     if not isinstance(temp,pd.Series):
                         fd_data.loc[time, self.variable_list] \
-                            = np.apply_along_axis(normalized, 0, np.array(temp),kwargs)
+                            = np.apply_along_axis(normalized, 0, np.array(temp),**kwargs)
 
         def append_y(x, re_st,):
             dateindex = pd.to_datetime(re_st.index, infer_datetime_format=True)
@@ -531,57 +532,72 @@ class context(object):
     #         temp,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
     #     return summary
 
-    def integrate_summary(self,horizon,freq,model_name,select_method,roll=-1):
+    def __stepwise(self,horizon, freq, model_name, select_method, roll=-1,*args,**kwargs):
 
-        v_len = len(self.variable_list)
-        integrate_summary = pd.DataFrame(np.zeros((v_len+4,2)),\
-                        index = self.variable_list + ['const','f_test','score','missing_rebalance'],\
-                                         columns=['p_value_average', 'num'])
-        missing = []
-        # def back_test(self, ben, horizon, freq, model_name,  ):
-        # initial setting
-        df = self.context_dict['close'].copy()
+            v_len = len(self.variable_list)
+            integrate_summary = pd.DataFrame(np.zeros((v_len + 4, 2)), \
+                                             index=self.variable_list + ['const', 'f_test', 'score',
+                                                                         'missing_rebalance'], \
+                                             columns=['p_value_average', 'num'])
+            missing = []
+            # initial setting
+            df = self.context_dict['close'].copy()
+            back_testing = df.index[pd.to_datetime(df.index) >= pd.to_datetime(self.start_day)]
 
-        back_testing = df.index[pd.to_datetime(df.index) >= pd.to_datetime(self.start_day)]
+            s = 0  # counting date
+            # ============================= Enter Back-testing ===================================
+            for cur_date in back_testing.values:
 
-        s = 0  # counting date
-        # ============================= Enter Back-testing ===================================
-        for cur_date in back_testing.values:
+                cur_date = pd.to_datetime(cur_date)
+                # rebalance in a fixed frequency in freq rate
+                if s > 0:  # begin to rebalance at least after the second recordings
+                    if np.mod(s, freq) == 0:
 
-            cur_date = pd.to_datetime(cur_date)
-            # rebalance in a fixed frequency in freq rate
-            if s > 0:  # begin to rebalance at least after the second recordings
-                if np.mod(s, freq) == 0:
+                        if self.extract_train(cur_date,horizon,select_method,roll=roll,*args,**kwargs):
+                            if np.shape(self.x_test)[0] > 0:
+                                test_y, summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
+                                temp = summary
+                                integrate_summary.loc[temp.index.values, 'num'] += 1
+                                ss = integrate_summary.loc[temp.index.values, 'num']
+                                integrate_summary.loc[temp.index.values, 'p_value_average'] \
+                                    = (ss - 1.0) / ss * integrate_summary.loc[ \
+                                    temp.index, 'p_value_average'] + 1.0 / ss * temp.iloc[:]
+                                if 'f_test' not in temp.index.values:
+                                    missing.append(cur_date)
+                s += 1
+            integrate_summary = integrate_summary.astype('object')
+            integrate_summary.at['missing_rebalance', 'num'] = missing
+            integrate_summary.to_csv(res_path + 'factor_' + model_name+'_'+ str(horizon) + '_' + str(roll) + '.csv')
 
-                    if self.extract_train(cur_date, horizon, select_method,roll=roll,):
-                        if np.shape(self.x_test)[0] > 0:
-                            test_y, summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
-                            # weight_new_temp, flag = order_method(test_y, self.long_position, self.short_position, \
-                            #                                      self.context_dict, cur_date, remove, bottom_thre,
-                            #                                      top_thre)
-                            temp = summary
-                            # temp.set_index([0], drop=True, inplace=True)
-                            integrate_summary.loc[temp.index.values, 'num'] += 1
-                            ss = integrate_summary.loc[temp.index.values, 'num']
-                            integrate_summary.loc[temp.index.values, 'p_value_average'] \
-                                = (ss - 1.0) / ss * integrate_summary.loc[\
-                                temp.index, 'p_value_average'] + 1.0 / ss * temp.iloc[:]
-                            if 'f_test' not in temp.index.values:
-                                missing.append(cur_date)
-            s+=1
-        integrate_summary = integrate_summary.astype('object')
-        integrate_summary.at['missing_rebalance', 'num'] = missing
-        integrate_summary.to_csv(res_path + 'inds_summary_all_' + str(horizon) +'_'+str(roll)+'.csv')
+    def __IC(self,horizon,method):
+            v_list = ['Date', 'tic', 'y'] + self.variable_list
+            # # read data from file
+            train = pd.read_csv('trains.csv')
+            train['Date'] = pd.to_datetime(train['Date'], format='%Y-%m-%d')
+            train.sort_values(['Date'], inplace=True)
+            train = train[v_list].copy()
+            corrs = train.groupby('Date').corr(min_periods=3).loc[:, 'y']
+            corrs_df = corrs.to_frame().reset_index()
+            corrs_df.columns = ['Date', 'v_list', 'corr']
+            summary = pd.DataFrame(index=['y'] + self.variable_list)
+            summary.loc[:, 'IC_mean'] = corrs_df.groupby('v_list').mean()
+            summary.loc[:, 'IC_std'] = corrs_df.groupby('v_list').std()
+            summary.loc[:, 'IC_median'] = corrs_df.groupby('v_list').median()
+            summary.loc[:, 'IC_IR'] = summary['IC_mean'] / summary['IC_std']
 
-    # def feature_indus_filter(self,inds,):
-    #     inds_num = []
-    #     for ind in inds:
-    #         inds_num.append(self.ind_dict[ind])
-    #     calendar = self.features.index.drop_duplicates()
-    #     print(calendar[-1])
-    #     for time in calendar.values:
-    #        tics = self.context_dict['industry_d2'].\
-    #            loc[time,~np.isin(self.context_dict['industry_d2'].loc[time,:],inds_num)].index.values
-    #        self.features.loc[time,:].loc[np.isin(self.features.loc[time,'tic'],tics),:] = np.nan
-    #     self.features.dropna(how ='any',axis =0,inplace=True)
-    #     print('filter industry completed!')
+            def autocorr(x, lags=1):
+                x = x.dropna()
+                x_lag = x.shift(lags)
+                return np.corrcoef(x[lags:], x_lag[lags:], rowvar=False)[1, 0]
+
+            x = corrs_df.set_index(['Date', 'v_list'])
+            summary.loc[:, 'IC_decay'] = x.groupby('v_list').apply(autocorr)
+            summary.drop(index=['y'], inplace=True)
+            summary.to_csv(res_path + 'factor_'+method+'_'+str(horizon)+'.csv')
+
+    def feature_selection(self, horizon, method, **kwargs):
+
+        if method =='StepWise':
+            self.__stepwise(horizon,**kwargs)
+        if method == 'IC':
+            self.__IC(horizon,method)
