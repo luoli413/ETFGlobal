@@ -9,7 +9,7 @@ data_path = os.path.join(path + '\\data\\')
 ana_path = os.path.join(path+'\\analytics\\')
 res_path = os.path.join(path+ '\\res\\')
 
-def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1):
+def compute_indicators(df,ben=None,save_address=None,trading_days=252.0, required=0.00, whole=1):
     # columns needed
     if ben == None:
         ben = str(ben)
@@ -132,7 +132,20 @@ def compute_indicators(df,ben,save_address,trading_days, required=0.00, whole=1)
         pass
     else:
         os.mkdir("res")
-    df_valid.to_csv(save_address)
+    if save_address is not None:
+        df_valid.to_csv(save_address)
+    else:
+        return df_valid.iloc[-1,:]
+
+def compute_indicators_break(df,ben,save_address):
+    # Break it into years
+    df_break = df.reset_index()
+    df_break.loc[:,'year'] = df_break['Date'].apply(lambda x:str(x)[:4])
+    df_break.set_index('Date',drop=True,inplace=True)
+    df_valid_break = df_break.groupby('year').apply(compute_indicators,ben=ben)
+    cols_needed = ['Annu_return','algo_volatility','sharpe',ben+'_sharpe','sortino','IR','VaR','CVaR',\
+                   'max_drawdown_ret','max_drawdown_start','max_drawdown_end']
+    df_valid_break[cols_needed].to_csv(save_address[:-4]+'_break.csv')
 
 class context(object):
 
@@ -471,14 +484,18 @@ class context(object):
 
                     if self.extract_train(cur_date,horizon,select_method,roll=roll,*args,**kwargs):
                         if np.shape(self.x_test)[0]>0:
-                            test_y,summary = strats.model(model_name, self.x_train, self.y_train, self.x_test)
+                            test_y,summary = strats.models(model_name, self.x_train, self.y_train,\
+                                                           self.x_test,**kwargs)
+
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
                                                         self.context_dict,cur_date,*args,**kwargs)
             df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag)
             self.s += 1
 
         if np.shape(df[df['rebalancing']==1])[0]>1:
-            compute_indicators(df, self.ben,res_path+'perf_'+address,self.trading_days)
+            save_address = res_path+'perf_'+address
+            compute_indicators(df, self.ben,save_address,self.trading_days)
+            compute_indicators_break(df, self.ben, save_address)
             weights.to_csv(res_path+'weights_' + address)
         else:
             print('no rebalance, no performnace.')
