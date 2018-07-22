@@ -87,7 +87,7 @@ if __name__ == "__main__":
     start_day = '2012-01-01'
     horizon = 21*1
     freq = 21*1  # rebalance monthly
-    roll = -1 # rolling in x months
+    roll = 36 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'StepWise'
     relative = True
@@ -96,6 +96,6 @@ if __name__ == "__main__":
     context = context(ben, start_day,variable_list,freq,)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
-    context.generate_train(horizon, relative, normalize=True,method='98%shrink')
+    # context.generate_train(horizon, relative, normalize=True,method='98%shrink')
     context.feature_selection(horizon,method=model_name,freq=freq,model_name = model_name,\
                               select_method=select_stocks,roll=roll)
