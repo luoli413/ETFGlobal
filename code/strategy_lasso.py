@@ -78,14 +78,14 @@ def order_method(test_y,context_dict,cur_date,thre):
 if __name__ == "__main__":
 
     # parameters initialization
-    # variable_list_3months = ['quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
-    #                  'quant_fundamental_pe','quant_fundamental_pb','quant_global_sector','quant_global_country',\
-    #                  'quant_fundamental_div','quant_quality_liquidity']
-    variable_list = ['quant_technical_st','quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
-                     'quant_sentiment_si','quant_fundamental_pe','quant_fundamental_div','quant_global_sector',\
-                     'quant_global_country','quant_quality_liquidity','quant_quality_firm',]
 
-    long_position = 1.5
+    # variable_list = ['quant_technical_st','quant_technical_it','quant_technical_lt','quant_sentiment_iv',\
+    #                  'quant_sentiment_si','quant_fundamental_pe','quant_fundamental_div','quant_global_sector',\
+    #                  'quant_global_country','quant_quality_liquidity','quant_quality_firm',]
+    variable_list = ['quant_technical_it', 'quant_technical_lt', 'quant_sentiment_iv', 'quant_fundamental_pe', \
+                     'quant_fundamental_pb', 'quant_global_country', 'quant_quality_firm']
+
+    long_position = 1.3
     short_position = -0.5
     leverage = 1.0
     # end_day = -1 # -1 means till today
@@ -108,9 +108,9 @@ if __name__ == "__main__":
                       interest_rate, trading_days, daily=daily, method=get_data_method)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
-    context.generate_train(horizon, relative, normalize, method=nor_method)
+    # context.generate_train(horizon, relative, normalize, method=nor_method)
     # Name the results using parameters and so on
-    address = 'etf_T_1.0_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
+    address = 'etf_T_0.001_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
               '_' + model_name + '_' + str(thre['long_thre'][1]) + '_' + str(thre['short_thre'][1]) + '_' + \
               str(horizon) + '_' + str(roll) + '_' + nor_method + '.csv'
     context.back_test(horizon, model_name, address, select_stocks, order_method, roll, thre=thre)
