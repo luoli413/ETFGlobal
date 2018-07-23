@@ -488,7 +488,7 @@ class context(object):
                                                            self.x_test,**kwargs)
 
                             weight_new_temp,flag = order_method(test_y,self.long_position,self.short_position,\
-                                                        self.context_dict,cur_date,*args,**kwargs)
+                                                        self.context_dict,cur_date,summary,*args,**kwargs)
             df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag)
             self.s += 1
 
