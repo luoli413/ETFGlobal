@@ -105,7 +105,7 @@ def models(model_names,*args,**kwargs):
             if isinstance(test_y, pd.DataFrame):
                 score = pd.Series(score,index=list(test_y.columns))
                 score_s = score.copy()
-                score_s[score_s == 0.0] = np.nan
+                score_s[score_s < 0] = np.nan
                 summary = score_s.mean()
 
                 score[score<0] = 0.0
