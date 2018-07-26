@@ -8,6 +8,9 @@ def __model(model_name, train_x, train_y, test_x,alpha = 0.1,*args,**kwargs):
     from sklearn.svm import SVR
     import sklearn
     import statsmodels.regression.linear_model as sm
+    from sklearn.model_selection import TimeSeriesSplit
+
+    cv = TimeSeriesSplit(n_splits=3)
     if model_name == 'Random':
         test_y = pd.Series(np.random.random_sample((len(test_x),)), index=test_x.index)
     if model_name == 'None':
@@ -22,17 +25,39 @@ def __model(model_name, train_x, train_y, test_x,alpha = 0.1,*args,**kwargs):
         lasso = model.fit(train_x, train_y)
         test_y = pd.Series(lasso.predict(test_x), index=test_x.index)
         summary = lasso.score(train_x,train_y)
+        # print(test_y.head())
+        # model = sklearn.linear_model.Lasso()
+        # param_grid = {'alpha':[1e-5,0.5*1e-4,1e-4,1e-3,1e-2,1e-1]}
+        # opt = sklearn.model_selection.GridSearchCV(model,param_grid,cv=cv)
+        # opt = opt.fit(train_x,train_y)
+        # test_y = pd.Series(opt.predict(test_x),index=test_x.index)
+        # summary = opt.score(train_x,train_y)
+        # print(opt.best_params_, summary)
     if model_name == 'Ridge':
         model = sklearn.linear_model.Ridge(1.0,fit_intercept = False)
         ridge = model.fit(train_x, train_y)
         test_y = pd.Series(ridge.predict(test_x), index=test_x.index)
+
         summary = ridge.score(train_x, train_y)
     if model_name == 'SVR':
-        svr_rbf = SVR(kernel='rbf', C=1, gamma=0.0001, epsilon=0.1)
-        svr_rbf.fit(train_x, train_y)
+        # param_grid = {'gamma':list(1.0/k*np.array([1e-4,1e-3,1e-2])),\
+        #               'C':[0.01,0.05,0.25,1.25]}
+        # param_grid = {
+        #               'C':[0.002,0.01,0.05,0.25,1.25]}
+        # opt = sklearn.model_selection.GridSearchCV(svr_rbf,param_grid,cv=cv)
+        # opt = opt.fit(train_x,train_y)
+        # y_pred_rbf = opt.predict(test_x)
+        # summary = opt.score(train_x,train_y)
+        # print(opt.best_params_, summary)
+
+        k = len(train_x.columns)
+        svr_rbf = SVR(kernel='rbf', C=0.05, gamma=1.0/k*1e-4,epsilon = 0.005, max_iter = 5000)
+        svr_rbf = svr_rbf.fit(train_x, train_y)
         y_pred_rbf = svr_rbf.predict(test_x)
         test_y = pd.Series(y_pred_rbf, index=test_x.index)
         summary = svr_rbf.score(train_x,train_y)
+        # print(test_y.head())
+
     if model_name == 'StepWise':
 
         feature_col = list(train_x.columns.values)
@@ -111,7 +136,7 @@ def models(model_names,*args,**kwargs):
                 score[score<0] = 0.0
                 score = score / score.sum()
 
-                if len(score) == test_y.shape[1]:
+                if (len(score) == test_y.shape[1])&(not score[~score.isnull()].empty):
                     test_y = pd.Series(np.dot(np.array(test_y),np.array(score)),\
                                       index=test_y.index)
                 else:
@@ -125,6 +150,7 @@ def models(model_names,*args,**kwargs):
         model_names = [model_names]
     for model in model_names:
         testy,summary = __model(model,*args,**kwargs)
+        # print(summary)
         if isinstance(testy,pd.Series):
             testy.name = model
         if test_y.empty:
