@@ -50,7 +50,7 @@ def fix_stock_order(order_case):
 
 #  It's used to order stocks
 @fix_stock_order
-def order_method(test_y,context_dict,cur_date,thre):
+def order_method(test_y,context_dict,cur_date,*args,thre,**kwargs):
 
     pool_short = []
     pool_long = []
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     interest_rate = 0.0
     horizon = 21*1
     freq = 21*1  # rebalance monthly
-    roll = -1  # rolling in x months
+    roll = 12 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'AdaBoost'
     relative = True
@@ -108,8 +108,8 @@ if __name__ == "__main__":
     #  variable list or other parameters.
     # context.generate_train(horizon, relative, normalize,method=nor_method)
     # Name the results using parameters and so on
-    address = 'etf_T_0.5_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
+    address = 'etf_T_0.1_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
               '_' + model_name + '_' + str(thre['long_thre'][1]) + '_' +str(thre['short_thre'][1])+'_'+ \
               str(horizon)+ '_' + str(roll) + '_'+nor_method+'.csv'
-    context.back_test(horizon, model_name, address, select_stocks, order_method,roll,thre=thre)
+    context.back_test(horizon, model_name, address, select_stocks, order_method,roll,thre=thre,)
 
