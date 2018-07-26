@@ -32,6 +32,7 @@ def fix_stock_order(order_case):
         weight_new = pd.Series(np.zeros(test_y.shape[0]), index=test_y.index)
         flag = True
         pool_long,pool_short = order_case(test_y,*args,**kwargs)
+
         if len(pool_long)>0:
             weight_new.loc[pool_long] = long_position / len(pool_long)
             # print(len(pool_long))
@@ -40,7 +41,7 @@ def fix_stock_order(order_case):
             # print(len(pool_short))
         if len(pool_long)<=0 & len(pool_short) <= 0:
             # equally-weighted portfolio with all stocks in test_y
-           weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
+            weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
 
         if weight_new.empty:
             flag = False
@@ -50,10 +51,12 @@ def fix_stock_order(order_case):
 
 #  It's used to order stocks
 @fix_stock_order
-def order_method(test_y,context_dict,cur_date,thre):
+def order_method(test_y,context_dict,cur_date,summary,filter_score,thre,):
 
     pool_short = []
     pool_long = []
+    if (isinstance(summary,float))&(summary<0)&(filter_score):
+        return pool_long,pool_short
     # case 1: only long position
     pool1 = test_y[test_y > test_y.quantile(q=1 - thre['long_thre'][1])]
     pool2 = test_y[test_y <= test_y.quantile(q=1 - thre['long_thre'][0])]
@@ -63,6 +66,7 @@ def order_method(test_y,context_dict,cur_date,thre):
     # add short position
     pool1 = test_y[test_y <= test_y.quantile(q= thre['short_thre'][1])]
     pool2 = test_y[test_y > test_y.quantile(q= thre['short_thre'][0])]
+
     if len(list(set(pool1.index.values).intersection(set(pool2.index.values)))) > 0:
         temp = pool2.loc[pool1.index]
         pool_short = temp[temp<0].index.values
@@ -94,13 +98,13 @@ if __name__ == "__main__":
     interest_rate = 0.0
     horizon = 21*1 # prediction horizon
     freq = 21*1  # rebalance monthly
-    roll = -1 # rolling in x months
+    roll = 36 # rolling in x months
     ben = 'ACWI' # benchmark
     model_name = 'Lasso'
     relative = True
     normalize = True
     nor_method = '98%shrink'
-    thre = {'long_thre': (0.0, 0.2), 'short_thre': (0.0, 0.2)}
+    thre = {'long_thre': (0.0, 0.2), 'short_thre': (0.0, 0.1)}
     daily = False
     get_data_method = 'last_date_monthly'
     # Back-test initialization
@@ -113,4 +117,4 @@ if __name__ == "__main__":
     address = 'etf_T_0.001_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
               '_' + model_name + '_' + str(thre['long_thre'][1]) + '_' + str(thre['short_thre'][1]) + '_' + \
               str(horizon) + '_' + str(roll) + '_' + nor_method + '.csv'
-    context.back_test(horizon, model_name, address, select_stocks, order_method, roll, thre=thre)
+    context.back_test(horizon, model_name, address, select_stocks, order_method, roll, thre=thre,filter_score=False)
