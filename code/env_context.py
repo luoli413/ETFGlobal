@@ -9,16 +9,27 @@ data_path = os.path.join(path + '\\data\\')
 ana_path = os.path.join(path+'\\analytics\\')
 res_path = os.path.join(path+ '\\res\\')
 
-def compute_indicators(df,ben=None,save_address=None,trading_days=252.0, required=0.00, whole=1):
+def compute_indicators(df,ben=None,save_address=None,\
+                       trading_days=252.0, required=0.00, whole=1,break_point=False,):
     # columns needed
+    col = [ben, 'nav', 'rebalancing', 'summary_score', 'stoploss', 'Interest_rate']
+    df_valid = df.loc[:, col]
+
+    if not break_point:
+        if df[df['rebalancing'] == 1].empty:
+            print('no rebalance, no performnace.')
+            return
+        else:
+            start_balance = df.index[df['rebalancing'] == 1][0]
+            df_valid = df_valid[pd.to_datetime(df_valid.index) >= \
+                                pd.to_datetime(start_balance)]
+    else:
+        if df.empty:
+            print('break:no data')
+            return
+
     if ben == None:
         ben = str(ben)
-    col = [ben, 'nav', 'rebalancing','summary_score', 'stoploss', 'Interest_rate']
-
-    df_valid = df.loc[:, col]
-    start_balance = df.index[df['rebalancing'] == 1][0]
-    df_valid = df_valid[pd.to_datetime(df_valid.index) >= \
-                        pd.to_datetime(start_balance)]
     # average socre of models in training set
     df_valid['ave_score'] = df['summary_score'].expanding(min_periods=1).apply(lambda x: np.nanmean(x))
     df_valid['summary_score'] = df_valid['summary_score'].fillna(method='ffill')
@@ -142,9 +153,9 @@ def compute_indicators_break(df,ben,save_address):
     df_break = df.reset_index()
     df_break.loc[:,'year'] = df_break['Date'].apply(lambda x:str(x)[:4])
     df_break.set_index('Date',drop=True,inplace=True)
-    df_valid_break = df_break.groupby('year').apply(compute_indicators,ben=ben)
+    df_valid_break = df_break.groupby('year').apply(compute_indicators,ben=ben,break_point=True)
     cols_needed = ['Annu_return','algo_volatility','sharpe',ben+'_sharpe','sortino','IR','VaR','CVaR',\
-                   'max_drawdown_ret','max_drawdown_start','max_drawdown_end']
+                   'hit_rate','max_drawdown_ret','max_drawdown_start','max_drawdown_end']
     df_valid_break[cols_needed].to_csv(save_address[:-4]+'_break.csv')
 
 class context(object):
@@ -152,8 +163,8 @@ class context(object):
     def get_data_monthly(self,method):
 
         df = pd.DataFrame()
-        close_df = self.context_dict['close']
-        close_df = close_df[close_df.index >= pd.to_datetime(self.start_day)]
+        close_df = self.context_dict['close'].copy()
+        # close_df = close_df[close_df.index >= pd.to_datetime(self.start_day)]
         if self.end_day != -1:
             close_df = close_df[close_df.index <= pd.to_datetime(self.end_day)]
 
@@ -373,9 +384,9 @@ class context(object):
                             index=train.loc[train['tic'] == tics, :].index)
             if len(rdq) > 0:
                 train.loc[train['tic'] == tics, 'y'] = rdq.apply(append_y, args=(re_st,))
-                print(tics)
+                # print(tics)
         self.train = train
-        train.to_csv('trains.csv')
+        train.to_hdf('trains.h5',key='train',format='table')
         print(train.shape)
         print('generating train completed!')
 
@@ -385,11 +396,11 @@ class context(object):
         # train = self.train[v_list].copy()
 
         # # read data from file
-        train = pd.read_csv('trains.csv')
-        train['Date'] = pd.to_datetime(train['Date'],format='%Y-%m-%d')
-        train.sort_values(['Date'],inplace=True)
-        train.set_index('Date',drop=True,inplace=True)
-        train = train[v_list].copy()
+        train = pd.read_hdf('trains.h5',key='train')
+        # train['Date'] = pd.to_datetime(train['Date'],format='%Y-%m-%d')
+        # train.sort_values(['Date'],inplace=True)
+        # train.set_index('Date',drop=True,inplace=True)
+        train = train[v_list]
 
         train = train[pd.to_datetime(train.index) < cur_date]
         bool = False
@@ -454,12 +465,16 @@ class context(object):
         df = self.context_dict['close'].copy()
         symbols = self.context_dict['close'].columns[:]
         symbols = symbols[symbols!= self.ben]
-        stock_num = len(symbols)
-        back_testing = df.index[pd.to_datetime(df.index) >= pd.to_datetime(self.start_day)]
+        start = pd.to_datetime(self.start_day)
+        back_testing = df.index[pd.to_datetime(df.index) >=start ]
+        if self.end_day != -1:
+            end_day = pd.to_datetime(self.end_day)
+            back_testing = df.index[(pd.to_datetime(df.index) >= start)&(pd.to_datetime(df.index)<= end_day) ]
+
         df = df.loc[back_testing.values, :]
         unit = np.full((len(df.index), 1), 1)[:, 0]
 
-        df['rebalancing'] = pd.Series()
+        df.loc[:,'rebalancing'] = pd.Series()
         df['stoploss'] = pd.Series()
         df['nav'] = pd.Series(unit, index=df.index)
         df['Interest_rate'] = pd.Series(np.full((len(df.index),), self.interest_rate),index=df.index)
@@ -469,6 +484,7 @@ class context(object):
         summary = None
         flag = False
         # max_new = []  # for computing max_drawdown
+        stock_num = len(symbols)
         unit = np.full((len(df.index), stock_num), 0)
         weights = pd.DataFrame(unit, index=df.index, columns=symbols)
         self.reb_index = 0
@@ -484,6 +500,7 @@ class context(object):
 
                     if self.extract_train(cur_date,horizon,select_method,roll=roll,*args,**kwargs):
                         if np.shape(self.x_test)[0]>0:
+
                             test_y,summary = strats.models(model_name, self.x_train, self.y_train,\
                                                            self.x_test,**kwargs)
 
@@ -492,14 +509,10 @@ class context(object):
             df,weights,flag = self.book(df,weights,weight_new_temp,summary,flag)
             self.s += 1
 
-        if np.shape(df[df['rebalancing']==1])[0]>1:
-            save_address = res_path+'perf_'+address
-            compute_indicators(df, self.ben,save_address,self.trading_days)
-            compute_indicators_break(df, self.ben, save_address)
-            weights.to_csv(res_path+'weights_' + address)
-        else:
-            print('no rebalance, no performnace.')
-
+        save_address = res_path+'perf_'+address
+        compute_indicators(df, self.ben,save_address,self.trading_days)
+        compute_indicators_break(df, self.ben, save_address)
+        weights.to_csv(res_path+'weights_' + address)
         print('back_test completed!')
 
     # def test_eps_surprise(self,address,select_method,top_per,bottom_per,thre=0.05):
