@@ -26,31 +26,33 @@ def select_stocks(symbols,context_dict, f_calendar, *args,**kwargs):
     #     symbols = list(set(symbols).intersection(set(temp)))
     return symbols
 
+
 def fix_stock_order(order_case):
 
-    def wrapper(test_y,long_position,short_position,*args,**kwargs):
+    def wrapper(test_y, long_position, short_position, summary, *args, **kwargs):
         weight_new = pd.Series(np.zeros(test_y.shape[0]), index=test_y.index)
         flag = True
-        pool_long,pool_short = order_case(test_y,*args,**kwargs)
-        if len(pool_long)>0:
+        pool_long, pool_short = order_case(test_y, *args, **kwargs)
+
+        if len(pool_long) > 0:
             weight_new.loc[pool_long] = long_position / len(pool_long)
             # print(len(pool_long))
-        if len(pool_short)>0:
+        if len(pool_short) > 0:
             weight_new.loc[pool_short] = short_position / len(pool_short)
             # print(len(pool_short))
-        if len(pool_long)<=0 & len(pool_short) <= 0:
+        if (len(pool_long) <= 0) & (len(pool_short) <= 0):
             # equally-weighted portfolio with all stocks in test_y
-           weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
+            weight_new.loc[test_y.index.values] = 1.0 / np.shape(test_y)[0]
 
         if weight_new.empty:
             flag = False
-        return weight_new,flag
+        return weight_new, flag
 
     return wrapper
 
 #  It's used to order stocks
 @fix_stock_order
-def order_method(test_y,context_dict,cur_date,thre):
+def order_method(test_y,context_dict,cur_date,thre,*args,**kwargs):
 
     pool_short = []
     pool_long = []
@@ -78,9 +80,11 @@ def order_method(test_y,context_dict,cur_date,thre):
 if __name__ == "__main__":
 
     # parameters initialization
-    variable_list = ['quant_technical_st', 'quant_technical_it', 'quant_technical_lt', 'quant_sentiment_iv', \
-                     'quant_sentiment_si', 'quant_fundamental_pe', 'quant_fundamental_div', 'quant_global_sector', \
-                     'quant_global_country', 'quant_quality_liquidity', 'quant_quality_firm', ]
+    # variable_list = ['quant_technical_st', 'quant_technical_it', 'quant_technical_lt', 'quant_sentiment_iv', \
+    #                  'quant_sentiment_si', 'quant_fundamental_pe', 'quant_fundamental_div', 'quant_global_sector', \
+    #                  'quant_global_country', 'quant_quality_liquidity', 'quant_quality_firm', ]
+    variable_list = ['quant_technical_it', 'quant_technical_lt', 'quant_sentiment_iv','quant_fundamental_pe', \
+                     'quant_fundamental_pb','quant_global_country','quant_quality_firm']
     long_position = 1.3
     short_position = -0.5
     leverage = 1.0
@@ -90,13 +94,14 @@ if __name__ == "__main__":
     interest_rate = 0.0
     horizon = 21*1
     freq = 21*1  # rebalance monthly
-    roll = -1  # rolling in x months
+    roll = 36 # rolling in x months
     ben = 'ACWI' # benchmark
-    model_name = 'Ridge'
+    model_name = ['SVR','Lasso']
+    # model_name = 'Ridge'
     relative = True
-    normalize =True
+    normalize = True
     nor_method = '98%shrink'
-    thre = {'long_thre':(0.0,0.2),'short_thre':(0.0,0.2)}
+    thre = {'long_thre':(0.0,0.2),'short_thre':(0.0,0.05)}
     daily = False
     get_data_method='last_date_monthly'
     # Back-test initialization
@@ -104,10 +109,11 @@ if __name__ == "__main__":
                       interest_rate, trading_days, daily=daily, method=get_data_method)
     # Form training set and you just need run once and after that you can comment it until you change
     #  variable list or other parameters.
-    context.generate_train(horizon, relative, normalize,method=nor_method)
+    # context.generate_train(horizon, relative, normalize,method=nor_method)
     # Name the results using parameters and so on
-    address = 'etf_T_1.0_long' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
-              '_' + model_name + '_' + str(thre['long_thre'][1]) + '_' +str(thre['short_thre'][1])+'_'+ \
+    address = 'etf_long_' + str(round(long_position, 1)) + '_' + 'short' + str(round(short_position, 1)) + \
+              '_' + str(model_name) + '_' + str(thre['long_thre'][1]) + '_' +str(thre['short_thre'][1])+'_'+ \
               str(horizon)+ '_' + str(roll) + '_'+nor_method+'.csv'
-    context.back_test(horizon, model_name, address, select_stocks, order_method,roll,thre=thre)
+    context.back_test(horizon, model_name, address, select_stocks, order_method,roll,\
+                      thre=thre,com_method='score')
 
